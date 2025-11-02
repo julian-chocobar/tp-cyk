@@ -8,33 +8,33 @@
 (1)  J  → { }                          // objeto vacío
 (2)  J  → { L }                        // objeto con contenido
 
-k(3)  L  → P                            // lista con un par
+(3)  L  → P                            // lista con un par
 (4)  L  → P , L                        // lista con múltiples pares
 
 (5)  P  → " K " : V                    // par clave:valor
 
-(6)  K  → letra                        // clave de un caracter
-(7)  K  → letra K                      // clave de múltiples caratcteres
+(6)  K  → C                            // clave de un caracter
+(7)  K  → C K                          // clave de múltiples caratcteres
 
-(8)  V  → número                       // valor numérico
+(8)  V  → N                            // valor numérico
 (9)  V  → ' S '                        // valor string
 (10) V  → J                            // valor objeto (recursión)
 
 (11) S  → ε                            // string vacío
-(12) S  → letra                        // string de un caracter
-(13) S  → letra S                      // string de múltiples caracteres
+(12) S  → C                            // string de un caracter
+(13) S  → C S                      // string de múltiples caracteres
 (14) S  → espacio                      // espacio en string
 (15) S  → espacio S                    // espacios en string
 
-(16) número → dígito                   // número de un dígito
-(17) número → dígito número            // número de múltiples dígitos
+(16) N  → D                   // número de un dígito
+(17) N  → D N            // número de múltiples dígitos
 
-(18) dígito → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-(19) letra → a | b | c | d | e | f | g | h | ... | z
+(18) D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+(19) C → a | b | c | d | e | f | g | h | ... | z
 ```
-<!--  -->
+<!--  -->       
 #### Símbolos:
-- Variables: J, L, P, K, V, S, número, dígito, letra
+- Variables: J, L, P, K, V, S, N, D, C
 - Terminales: {, }, [, ], ", ', :, ,, espacio, 0-9, a-z
 
 ## Ejemplo 1: `{"a":10}`
@@ -44,12 +44,12 @@ k(3)  L  → P                            // lista con un par
 J ⇒ { L }
   ⇒ { P }
   ⇒ { " K " : V }
-  ⇒ { " letra " : V }
+  ⇒ { " C " : V }
   ⇒ { " a " : V }
-  ⇒ { " a " : número }
-  ⇒ { " a " : dígito número }
-  ⇒ { " a " : 1 número }
-  ⇒ { " a " : 1 dígito }
+  ⇒ { " a " : N }
+  ⇒ { " a " : D N }
+  ⇒ { " a " : 1 N }
+  ⇒ { " a " : 1 D }
   ⇒ { " a " : 1 0 }
 ```
 
@@ -65,12 +65,12 @@ J ⇒ { L }
               ┌─────────┼─────────┐
               "    K    "    :    V
                    |              |
-                 letra        número
+                 C        N
                    |              |
                    a         ┌────┴────┐
-                          dígito   número
+                          D   N
                              |         |
-                             1      dígito
+                             1      D
                                        |
                                        0
 ```
@@ -82,12 +82,12 @@ J ⇒ { L }
 J ⇒ { L }
   ⇒ { P , L }
   ⇒ { " K " : V , L }
-  ⇒ { " a " : número , L }
+  ⇒ { " a " : N , L }
   ⇒ { " a " : 1 0 , L }
   ⇒ { " a " : 1 0 , P }
   ⇒ { " a " : 1 0 , " K " : V }
   ⇒ { " a " : 1 0 , " b " : ' S ' }
-  ⇒ { " a " : 1 0 , " b " : ' letra S ' }
+  ⇒ { " a " : 1 0 , " b " : ' C S ' }
   ⇒ { " a " : 1 0 , " b " : ' h S ' }
   ⇒ { " a " : 1 0 , " b " : ' h o S ' }
   ⇒ { " a " : 1 0 , " b " : ' h o l S ' }
@@ -107,7 +107,7 @@ J ⇒ { L }
                    ┌─────┼──────┐  P
                    "  K  "  :  V   |
                       |        |   ...
-                      a    número
+                      a        N
                               |
                             10
 ```
@@ -158,12 +158,12 @@ J ⇒ { L }
 J  → { } | { L }
 L  → P | P , L
 P  → " K " : V
-K  → letra | letra K
-V  → número | ' S ' | J
-S  → ε | letra | letra S | espacio | espacio S
-número → dígito | dígito número
-dígito → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-letra → a | b | c | ... | z
+K  → C | C K
+V  → N | ' S ' | J
+S  → ε | C | C S | espacio | espacio S
+N → D | D N
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+C → a | b | c | ... | z
 ```
 
 ---
@@ -191,11 +191,11 @@ Para cada producción que contiene S, generamos versiones con y sin S.
   - V → ' S ' (S presente)
   - V → ' ' (S ausente)
 
-**Producción S → letra S:**
-- Original: S → letra S
+**Producción S → C S:**
+- Original: S → C S
 - S es nulleable, entonces:
-  - S → letra S (S presente)
-  - S → letra (S ausente)
+  - S → C S (S presente)
+  - S → C (S ausente)
 
 **Producción S → espacio S:**
 - Original: S → espacio S
@@ -208,12 +208,12 @@ Para cada producción que contiene S, generamos versiones con y sin S.
 J  → { } | { L }
 L  → P | P , L
 P  → " K " : V
-K  → letra | letra K
-V  → número | ' S ' | ' ' | J
-S  → letra | letra S | espacio | espacio S
-número → dígito | dígito número
-dígito → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-letra → a | b | c | ... | z
+K  → C | C K
+V  → N | ' S ' | J
+S  → C | C S | espacio | espacio S
+N → D | D N
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+C → a | b | c | ... | z
 ```
 
 ---
@@ -224,8 +224,8 @@ letra → a | b | c | ... | z
 
 **Caso base:**
 ```
-(J,J), (L,L), (P,P), (K,K), (V,V), (S,S), (número,número), 
-(dígito,dígito), (letra,letra)
+(J,J), (L,L), (P,P), (K,K), (V,V), 
+(S,S), (N,N), (D,D), (C,C)
 ```
 
 **Caso inductivo:**
@@ -240,35 +240,35 @@ De V → J:
 (V, J)
 ```
 
-De V → número:
+De V → N:
 ```
-(V, número)
-```
-
-De K → letra:
-```
-(K, letra)
+(V, N)
 ```
 
-De S → letra:
+De K → C:
 ```
-(S, letra)
-```
-
-De número → dígito:
-```
-(número, dígito)
+(K, C)
 ```
 
-De dígito → 0|1|...|9:
+De S → C:
 ```
-(dígito, 0), (dígito, 1), ..., (dígito, 9)
+(S, C)
+```
+
+De N → D:
+```
+(N, D)
+```
+
+De D → 0|1|...|9:
+```
+(D, 0), (D, 1), ..., (D, 9)
 ```
 
 **Pares unitarios completos:**
 ```
-(L, P), (V, J), (V, número), (K, letra), (S, letra), 
-(número, dígito), (dígito, 0), (dígito, 1), ..., (dígito, 9)
+(L, P), (V, J), (V, N), (K, C), (S, C), 
+(N, D), (D, 0), (D, 1), ..., (D, 9)
 ```
 
 ### Aplicar eliminación de unitarias:
@@ -282,21 +282,21 @@ De dígito → 0|1|...|9:
 - J → { L } (no unitaria)
 - Agregar: V → { } | { L }
 
-**Para V → número:**
-- número → dígito número (no unitaria)
-- Agregar: V → dígito número
+**Para V → N:**
+- N → D | D N (no unitaria)
+- Agregar: V → D | D N
 
-**Para K → letra:**
-- letra → a | b | c | ... (no unitarias)
+**Para K → C:**
+- C → a | b | c | ... (no unitarias)
 - Agregar: K → a | b | c | ...
 
-**Para S → letra:**
-- letra → a | b | c | ... (no unitarias)
+**Para S → C:**
+- C → a | b | c | ... (no unitarias)
 - Agregar: S → a | b | c | ...
 
-**Para número → dígito:**
-- dígito → 0 | 1 | ... | 9 (no unitarias)
-- Agregar: número → 0 | 1 | ... | 9
+**Para N → D:**
+- D → 0 | 1 | ... | 9 (no unitarias)
+- Agregar: N → 0 | 1 | ... | 9
 
 ### Gramática después de eliminar unitarias:
 ```
@@ -306,17 +306,17 @@ L  → " K " : V | P , L
 
 P  → " K " : V
 
-K  → letra K | a | b | c | d | e | f | g | h | ... | z
+K  → C K | a | b | c | d | e | f | g | h | ... | z
 
-V  → ' S ' | ' ' | { } | { L } | dígito número | dígito
+V  → ' S ' | ' ' | { } | { L } | D N | D
 
-S  → letra S | espacio S | a | b | c | ... | z | espacio
+S  → C S | espacio S | a | b | c | ... | z | espacio
 
-número → dígito número | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+N → D N | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-dígito → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-letra → a | b | c | d | e | f | g | h | ... | z
+C → a | b | c | d | e | f | g | h | ... | z
 ```
 
 ---
@@ -332,20 +332,20 @@ Generadores: {, }, ", ', :, ,, espacio, 0, 1, 2, ..., 9, a, b, c, ..., z
 
 **Iteración 2:**
 ```
-- dígito → 0 (todos sus símbolos son generadores) ✓
-- letra → a (todos sus símbolos son generadores) ✓
+- D → 0 (todos sus símbolos son generadores) ✓
+- C → a (todos sus símbolos son generadores) ✓
 
-Generadores: {..., dígito, letra}
+Generadores: {..., D, C}
 ```
 
 **Iteración 3:**
 ```
 - K → a (generador) ✓
-- K → letra K (letra y K son generadores) ✓
+- K → C K (letra y K son generadores) ✓
 - S → a (generador) ✓
-- S → letra S (ambos generadores) ✓
+- S → C S (ambos generadores) ✓
 - número → 0 (generador) ✓
-- número → dígito número (ambos generadores) ✓
+- número → D número (ambos generadores) ✓
 
 Generadores: {..., K, S, número}
 ```
@@ -355,7 +355,7 @@ Generadores: {..., K, S, número}
 - V → ' ' (ambos terminales) ✓
 - V → ' S ' (todos generadores) ✓
 - V → { } (ambos terminales) ✓
-- V → dígito número (ambos generadores) ✓
+- V → D N (ambos generadores) ✓
 - P → " K " : V (todos generadores) ✓
 
 Generadores: {..., V, P}
@@ -408,13 +408,13 @@ Alcanzables: {J, {, }, L, ", K, :, V, P, ,}
 
 **Iteración 4 (desde K, V, P):**
 ```
-K → letra K | a | b | c | ...
-V → ' S ' | ' ' | { } | { L } | dígito número
+K → C K | a | b | c | ...
+V → ' S ' | ' ' | { } | { L } | D N
 P → " K " : V
 
-Agregar: letra, a-z, ', S, dígito, número
+Agregar: C, a-z, ', S, D, N
 
-Alcanzables: {J, L, P, K, V, S, número, dígito, letra, {, }, ", ', :, ,, espacio, 0-9, a-z}
+Alcanzables: {J, L, P, K, V, S, N, D, C, {, }, ", ', :, ,, espacio, 0-9, a-z}
 ```
 
 **Conclusión:** Todos los símbolos son alcanzables ✓
@@ -432,12 +432,12 @@ Necesitamos que cada producción sea:
 J  → { } | { L }
 L  → " K " : V | P , L
 P  → " K " : V
-K  → letra K | a | b | c | ... | z
-V  → ' S ' | ' ' | { } | { L } | dígito número
-S  → letra S | espacio S | a | b | ... | z | espacio
-número → dígito número | 0 | 1 | ... | 9
-dígito → 0 | 1 | ... | 9
-letra → a | b | ... | z
+K  → C K | a | b | c | ... | z
+V  → ' S ' | ' ' | { } | { L } | D N
+S  → C S | espacio S | a | b | ... | z | espacio
+N → D N | 0 | 1 | ... | 9
+D → 0 | 1 | ... | 9
+C → a | b | ... | z
 ```
 
 ### Sub-paso 5.1: Aislar terminales
@@ -471,25 +471,25 @@ L  → T_comilla K T_comilla T_dos_puntos V
 
 P  → T_comilla K T_comilla T_dos_puntos V
 
-K  → letra K 
+K  → C K 
    | a | b | c | ... | z
 
 V  → T_apostrofe S T_apostrofe 
    | T_apostrofe T_apostrofe 
    | T_llave_izq T_llave_der 
    | T_llave_izq L T_llave_der 
-   | dígito número
+   | D N
 
-S  → letra S 
+S  → C S 
    | T_espacio S 
    | a | b | ... | z 
    | espacio
 
-número → dígito número | 0 | 1 | ... | 9
+N → D N | 0 | 1 | ... | 9
 
-dígito → 0 | 1 | ... | 9
+D → 0 | 1 | ... | 9
 
-letra → a | b | ... | z
+C → a | b | ... | z
 ```
 
 ### Sub-paso 5.2: Descomponer producciones largas
@@ -544,7 +544,7 @@ Z10 → L T_llave_der
 
 ### Variables:
 ```
-  J, L, P, K, V, S, número, dígito, letra,
+  J, L, P, K, V, S, N, D, C,
   Z1, Z2, Z3, Z4, Z5, Z6, Z7, Z8, Z9, Z10,
   T_llave_izq, T_llave_der, T_comilla, T_apostrofe, 
   T_dos_puntos, T_coma, T_espacio, T_0, ..., T_9, T_a, ..., T_z
@@ -579,21 +579,21 @@ Z6 → K Z7
 Z7 → T_comilla Z8
 Z8 → T_dos_puntos V
 
-K → letra K
+K → C K
 
 V → T_apostrofe Z9
 V → T_apostrofe T_apostrofe
 V → T_llave_izq T_llave_der
 V → T_llave_izq Z10
-V → dígito número
+V → D N
 
 Z9 → S T_apostrofe
 Z10 → L T_llave_der
 
-S → letra S
+S → C S
 S → T_espacio S
 
-número → dígito número
+N → D N
 ```
 
 ### PRODUCCIONES TIPO A → a (un terminal):
@@ -640,20 +640,20 @@ S → b
 S → z
 S → espacio
 
-número → 0
-número → 1
+N → 0
+N → 1
 ... (todos los dígitos)
-número → 9
+N → 9
 
-dígito → 0
-dígito → 1
+D → 0
+D → 1
 ... (todos los dígitos)
-dígito → 9
+D → 9
 
-letra → a
-letra → b
+C → a
+C → b
 ... (todas las letras)
-letra → z
+C → z
 ```
 
 ---
@@ -675,7 +675,7 @@ J ⇒ T_llave_izq Z1
   ⇒ { " a " Z4 }
   ⇒ { " a " T_dos_puntos V }
   ⇒ { " a " : V }
-  ⇒ { " a " : dígito número }
+  ⇒ { " a " : D número }
   ⇒ { " a " : T_1 número }
   ⇒ { " a " : 1 número }
   ⇒ { " a " : 1 T_0 }
@@ -702,8 +702,8 @@ J ⇒ T_llave_izq Z1
                   "   /   \
               T_dos_puntos V
                   |       / \
-                  :    dígito número
-                         |      |
+                  :      D    N
+                         |     \
                         T_1    T_0
                          |      |
                          1      0
