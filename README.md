@@ -1,3 +1,17 @@
+# Trabajo Práctico CYK
+
+## Índice
+
+- [Parte 1: Gramática para JSON](#trabajo-práctico-cyk---parte-1-gramática-para-json)
+- [Parte 2: Transformación a FNC](#trabajo-práctico-cyk---parte-2-transformación-a-fnc)
+- [Parte 3: Implementación en PostgreSQL](#trabajo-práctico-cyk---parte-3-implementación-en-postgresql)
+- [Instalación](#instalación)
+- [Uso del Sistema](#uso-del-sistema)
+- [Estructura de Archivos](#estructura-de-archivos)
+- [Tests](#tests)
+- [Visualización de Resultados](#visualización-de-resultados)
+- [Extensiones y Mejoras](#extensiones-y-mejoras)
+
 # Trabajo Práctico CYK - Parte 1: Gramática para JSON
 
 ### Símbolo inicial: J
@@ -944,14 +958,9 @@ tp-cyk/
     └── manual_uso.md              # Manual extendido
 ```
 
-## Ejecución Modular
-
-Puedes ejecutar componentes individuales:
+## Tests
 
 ```bash
-# Solo recrear las funciones CYK
-psql -U postgres -d tp_cyk -f sql/03_funciones/cyk_principal.sql
-
 # Ejecutar todos los tests
 psql -U postgres -d tp_cyk -f sql/05_tests/run_all_tests.sql
 
