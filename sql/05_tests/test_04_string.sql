@@ -55,6 +55,18 @@ END $$;
 
 SELECT * FROM mostrar_matriz_compacta();
 
+DO $$
+BEGIN
+    RAISE NOTICE '';
+    RAISE NOTICE '─────────────────────────────────────────────────────────────────';
+    RAISE NOTICE 'MATRIZ EXPANDIDA (vista matriz_expandida):';
+    RAISE NOTICE '─────────────────────────────────────────────────────────────────';
+END $$;
+
+SELECT i, j, variable
+FROM matriz_expandida
+ORDER BY i, j, variable;
+
 -- Análisis del resultado
 DO $$
 DECLARE

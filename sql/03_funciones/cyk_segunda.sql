@@ -13,18 +13,14 @@
 
 SET search_path TO cyk;
 
-CREATE OR REPLACE FUNCTION setear_segunda_fila()
+CREATE OR REPLACE FUNCTION cyk.setear_segunda_fila()
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;
-    i INTEGER;
-    j INTEGER;
-    vars_resultado TEXT[];
-    xii TEXT[];
-    xii_plus_1 TEXT[];
-    var_b TEXT;
-    var_c TEXT;
-    vars_encontradas TEXT[];
+    idx_i INTEGER;
+    idx_j INTEGER;
+    filas_afectadas INTEGER;
+    vars_actuales TEXT[];
 BEGIN
     -- Obtener longitud del string
     n := obtener_longitud_string();
@@ -39,55 +35,50 @@ BEGIN
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
     
-    -- Para cada subcadena de longitud 2
-    FOR i IN 1..(n - 1) LOOP
-        j := i + 1;
-        vars_resultado := '{}';
-        
-        -- Obtener Xii y X(i+1)(i+1) de la fila base
-        xii := get_xij(i, i);
-        xii_plus_1 := get_xij(i + 1, i + 1);
-        
-        RAISE NOTICE '  Procesando X[%,%]:', i, j;
-        RAISE NOTICE '    Xii = X[%,%] = %', i, i, array_to_string(xii, ', ');
-        RAISE NOTICE '    X(i+1)(i+1) = X[%,%] = %', i+1, i+1, array_to_string(xii_plus_1, ', ');
-        
-        -- Para cada combinación B ∈ Xii y C ∈ X(i+1)(i+1)
-        -- Usar unnest para iterar (sugerencia del profesor)
-        IF array_length(xii, 1) > 0 AND array_length(xii_plus_1, 1) > 0 THEN
-            FOR var_b, var_c IN 
-                SELECT b.var AS var_b, c.var AS var_c
-                FROM unnest(xii) AS b(var)
-                CROSS JOIN unnest(xii_plus_1) AS c(var)
-            LOOP
-                -- Buscar producciones A → BC
-                vars_encontradas := obtener_vars_binarias(var_b, var_c);
-                
-                IF array_length(vars_encontradas, 1) > 0 THEN
-                    RAISE NOTICE '    → Encontrado: % (de % → % %)', 
-                        array_to_string(vars_encontradas, ', '),
-                        array_to_string(vars_encontradas, '/'),
-                        var_b, 
-                        var_c;
-                    
-                    -- Unir con resultado (eliminando duplicados)
-                    vars_resultado := union_arrays(vars_resultado, vars_encontradas);
-                END IF;
-            END LOOP;
-        END IF;
-        
-        -- Insertar resultado en la matriz
-        PERFORM set_xij(i, j, vars_resultado);
-        
-        IF array_length(vars_resultado, 1) > 0 THEN
-            RAISE NOTICE '  ✓ X[%,%] = %', i, j, array_to_string(vars_resultado, ', ');
+    WITH pares AS (
+        SELECT 
+            gs AS i,
+            gs + 1 AS j
+        FROM generate_series(1, n - 1) AS gs
+    ),
+    combinaciones AS (
+        SELECT
+            p.i,
+            p.j,
+            COALESCE(
+                ARRAY_AGG(DISTINCT pb.variable) FILTER (WHERE pb.variable IS NOT NULL),
+                ARRAY[]::TEXT[]
+            ) AS vars
+        FROM pares p
+        LEFT JOIN cyk.matriz_expandida b
+               ON b.i = p.i
+              AND b.j = p.i
+        LEFT JOIN cyk.matriz_expandida c
+               ON c.i = p.j
+              AND c.j = p.j
+        LEFT JOIN prod_binarias pb
+               ON pb.var_b = b.variable
+              AND pb.var_c = c.variable
+        GROUP BY p.i, p.j
+    )
+    INSERT INTO matriz_cyk (i, j, x)
+    SELECT combinaciones.i, combinaciones.j, combinaciones.vars
+    FROM combinaciones
+    ON CONFLICT (i, j) DO UPDATE SET x = EXCLUDED.x;
+    
+    filas_afectadas := n - 1;
+    
+    FOR idx_i IN 1..(n - 1) LOOP
+        idx_j := idx_i + 1;
+        vars_actuales := get_xij(idx_i, idx_j);
+        IF array_length(vars_actuales, 1) > 0 THEN
+            RAISE NOTICE '  ✓ X[%,%] = {%}', idx_i, idx_j, array_to_string(vars_actuales, ', ');
         ELSE
-            RAISE NOTICE '  ✓ X[%,%] = {}', i, j;
+            RAISE NOTICE '  ✓ X[%,%] = {}', idx_i, idx_j;
         END IF;
-        RAISE NOTICE '';
     END LOOP;
     
-    RAISE NOTICE '✓ Segunda fila completada (% celdas)', n - 1;
+    RAISE NOTICE '✓ Segunda fila completada (% celdas)', filas_afectadas;
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
 END;

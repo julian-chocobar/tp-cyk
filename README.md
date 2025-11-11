@@ -2,17 +2,18 @@
 
 ## Índice
 
-- [Parte 1: Gramática para JSON](#trabajo-práctico-cyk---parte-1-gramática-para-json)
-- [Parte 2: Transformación a FNC](#trabajo-práctico-cyk---parte-2-transformación-a-fnc)
-- [Parte 3: Implementación en PostgreSQL](#trabajo-práctico-cyk---parte-3-implementación-en-postgresql)
-- [Instalación](#instalación)
-- [Uso del Sistema](#uso-del-sistema)
-- [Estructura de Archivos](#estructura-de-archivos)
-- [Tests](#tests)
-- [Visualización de Resultados](#visualización-de-resultados)
-- [Extensiones y Mejoras](#extensiones-y-mejoras)
+- [Parte 1: Gramática para JSON](#parte-1-gramática-para-json)
+- [Parte 2: Transformación a FNC](#parte-2-transformación-a-fnc)
+- [Parte 3: Implementación en PostgreSQL](#parte-3-implementación-en-postgresql)
+  - [Instalación](#instalación)
+  - [Uso del Sistema](#uso-del-sistema)
+  - [Estructura de Archivos](#estructura-de-archivos)
+  - [Tests](#tests)
+  - [Visualización de Resultados](#visualización-de-resultados)
+- [Parte 4: Consultas de Visualización](#parte-4-consultas-de-visualización)
+- [Parte 5: Extensiones y Mejoras](#parte-5-extensiones-y-mejoras)
 
-# Trabajo Práctico CYK - Parte 1: Gramática para JSON
+## Parte 1: Gramática para JSON
 
 ### Símbolo inicial: J
 
@@ -174,7 +175,7 @@ J ⇒ { L }
                                      "d":99
 ```
 
-# Trabajo Práctico CYK - Parte 2: Transformación a FNC
+## Parte 2: Transformación a FNC
 
 ### Gramática Inicial (de la Parte 1)
 
@@ -729,7 +730,7 @@ C → z
 
 ---
 
-## Verificación con Ejemplos
+### Verificación con Ejemplos
 
 ### Ejemplo : `{"a":10}` con la gramática en FNC
 
@@ -782,9 +783,9 @@ J ⇒ T_llave_izq Z1
                          1      0
 ```
 
-# Trabajo Práctico CYK - Parte 3: Implementación en PostgreSQL
+## Parte 3: Implementación en PostgreSQL
 
-## Arquitectura del Sistema
+### Arquitectura del Sistema
 
 ### 📊 Tablas Principales
 
@@ -841,6 +842,8 @@ cyk(string) → Boolean
 - ✅ **Segunda fila optimizada**: Solo 1 partición posible
 - ✅ **Reutilización de resultados**: Programación dinámica pura
 - ✅ **Uso de unnest**: Para iterar sobre arrays de variables
+- ✅ **Consultas set-based**: Las funciones `setear_fila_base`, `setear_segunda_fila` y `setear_matriz`
+  usan joins con `unnest` para combinar variables sin bucles explícitos
 
 ### 📈 Complejidad
 
@@ -852,7 +855,7 @@ cyk(string) → Boolean
 - **Espacio**: O(n²)
   - Matriz triangular de n×n celdas
 
-## Instalación
+### Instalación
 
 ### Requisitos
 
@@ -875,56 +878,56 @@ psql -U postgres -d tp_cyk -f sql/main.sql
 dropdb -U postgres tp_cyk
 ```
 
-## Uso del Sistema
+### Uso del Sistema
 
 ### Comandos Básicos
 
 ```sql
--- Antes de ejecutar funciones en una nueva sesión
+-- Configurar el search_path (ejecutar una vez por sesión)
 SET search_path TO cyk;
 
 -- Conectar a la base de datos
 \c tp_cyk
 
 -- Ver la gramática cargada
-SELECT * FROM cyk.ver_gramatica;
+SELECT * FROM ver_gramatica();
 
 -- Ejecutar el algoritmo CYK
-SELECT cyk.cyk('{"a":10}');
+SELECT cyk('{"a":10}');
 
 -- Ver la matriz resultante
-SELECT * FROM cyk.mostrar_matriz();
+SELECT * FROM mostrar_matriz();
 
 -- Limpiar datos para nueva ejecución
-SELECT cyk.limpiar_datos();
+SELECT limpiar_datos();
 
 -- Verificar integridad de la gramática
-SELECT * FROM cyk.verificar_gramatica();
+SELECT * FROM verificar_gramatica();
 ```
 
 ### Ejemplos de Tests
 
 ```sql
 -- Test 1: Objeto vacío
-SELECT cyk.cyk('{}');
+SELECT cyk('{}');
 
 -- Test 2: Un par clave-valor numérico
-SELECT cyk.cyk('{"a":10}');
+SELECT cyk('{"a":10}');
 
 -- Test 3: Dos pares
-SELECT cyk.cyk('{"a":10,"b":99}');
+SELECT cyk('{"a":10,"b":99}');
 
 -- Test 4: Valor string
-SELECT cyk.cyk('{"a":''hola''}');
+SELECT cyk('{"a":''hola''}');
 
 -- Test 5: String con espacios
-SELECT cyk.cyk('{"nombre":''Juan Perez''}');
+SELECT cyk('{"nombre":''Juan Perez''}');
 
 -- Test 6: Anidamiento
-SELECT cyk.cyk('{"a":{"b":1}}');
+SELECT cyk('{"a":{"b":1}}');
 ```
 
-## Estructura de Archivos
+### Estructura de Archivos
 
 ```
 tp-cyk/
@@ -954,11 +957,9 @@ tp-cyk/
 │       ├── test_02_simple.sql
 │       ├── test_03_dos_pares.sql
 │       └── test_04_string.sql
-└── docs/
-    └── manual_uso.md              # Manual extendido
 ```
 
-## Tests
+### Tests
 
 ```bash
 # Ejecutar todos los tests
@@ -975,26 +976,26 @@ psql -U postgres -d tp_cyk -c "DELETE FROM cyk.GLC_en_FNC;"
 psql -U postgres -d tp_cyk -f sql/02_data/carga_gramatica_json.sql
 ```
 
-## Visualización de Resultados
+### Visualización de Resultados
 
 ### Ver Gramática
 
 ```sql
 -- Vista formateada
-SELECT * FROM cyk.ver_gramatica;
+SELECT * FROM ver_gramatica();
 
 -- Estadísticas
 SELECT
     COUNT(*) AS total_producciones,
     COUNT(*) FILTER (WHERE tipo_produccion = 1) AS terminales,
     COUNT(*) FILTER (WHERE tipo_produccion = 2) AS binarias
-FROM cyk.GLC_en_FNC;
+FROM GLC_en_FNC;
 
 -- Producciones por variable
 SELECT
     parte_izq,
     COUNT(*) AS cantidad
-FROM cyk.GLC_en_FNC
+FROM GLC_en_FNC
 GROUP BY parte_izq
 ORDER BY cantidad DESC;
 ```
@@ -1019,14 +1020,33 @@ Tokens: [{] ["] [a] ["] [:] [1] [0] [}]
 [T_l][Z1 ][V  ][Z4 ][T_d][N  ][D,N]
 ```
 
-## Extensiones y Mejoras
+## Parte 4: Consultas de Visualización
+
+Para cumplir con los requerimientos de la Parte 4, podés ejecutar las siguientes consultas (recordá ejecutar `SET search_path TO cyk;` en la sesión actual):
+
+```sql
+-- Mostrar la gramática almacenada en FNC
+SELECT * FROM ver_gramatica();
+
+-- Mostrar la matriz CYK en formato triangular completo
+SELECT * FROM mostrar_matriz();
+
+-- (Opcional) Mostrar la matriz CYK en formato compacto
+SELECT * FROM mostrar_matriz_compacta();
+```
+
+Estas consultas también se listan en la sección de uso del sistema.
+
+## Parte 5: Extensiones y Mejoras
+
+Antes de realizar estas tareas, recordá ejecutar `SET search_path TO cyk;`.
 
 ### Agregar Nueva Gramática
 
 1. Limpiar gramática actual:
 
 ```sql
-DELETE FROM cyk.GLC_en_FNC;
+DELETE FROM GLC_en_FNC;
 ```
 
 2. Insertar nueva gramática en FNC:
@@ -1037,7 +1057,7 @@ DELETE FROM cyk.GLC_en_FNC;
 -- T → ( E ) | num
 
 -- En FNC:
-INSERT INTO cyk.GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
+INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
 (TRUE, 'E', 'E', 'X1', 2),
 (FALSE, 'X1', 'Plus', 'T', 2),
 (FALSE, 'E', 'T', NULL, 1),  -- Espera, esto es unitaria!
@@ -1047,7 +1067,7 @@ INSERT INTO cyk.GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produ
 3. Probar:
 
 ```sql
-SELECT cyk.cyk('1+2');
+SELECT cyk('1+2');
 ```
 
 ### Optimizaciones Aplicadas

@@ -25,6 +25,7 @@ DECLARE
     str_actual TEXT;
     tokens_str TEXT;
     celdas_llenas INTEGER;
+    offset_idx INTEGER;
 BEGIN
     -- Obtener longitud
     n := obtener_longitud_string();
@@ -66,7 +67,8 @@ BEGIN
     -- ========================================================================
     
     -- Fila por fila, de abajo (i=n) hacia arriba (i=1)
-    FOR i_idx IN REVERSE 1..n LOOP
+    FOR offset_idx IN 0..(n - 1) LOOP
+        i_idx := n - offset_idx;
         linea := '';
         
         -- Agregar espacios iniciales para formar el triángulo
@@ -111,7 +113,7 @@ BEGIN
         linea := linea || '    col ' || j_idx;
         EXIT; -- Solo mostrar para la primera columna (como referencia)
     END LOOP;
-    
+    RETURN QUERY SELECT linea::TEXT;
     RETURN QUERY SELECT ''::TEXT;
     
     -- ========================================================================
@@ -179,6 +181,7 @@ DECLARE
     linea TEXT;
     vars TEXT[];
     count_vars INTEGER;
+    offset_idx INTEGER;
 BEGIN
     n := obtener_longitud_string();
     
@@ -192,7 +195,8 @@ BEGIN
     RETURN QUERY SELECT ''::TEXT;
     
     -- Mostrar matriz de abajo hacia arriba
-    FOR i_idx IN REVERSE 1..n LOOP
+    FOR offset_idx IN 0..(n - 1) LOOP
+        i_idx := n - offset_idx;
         linea := '';
         
         -- Espacios para el triángulo

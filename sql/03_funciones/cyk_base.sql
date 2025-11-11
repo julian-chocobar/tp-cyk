@@ -12,13 +12,12 @@
 
 SET search_path TO cyk;
 
-CREATE OR REPLACE FUNCTION setear_fila_base()
+CREATE OR REPLACE FUNCTION cyk.setear_fila_base()
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;
-    i INTEGER;
-    terminal TEXT;
-    vars_array TEXT[];
+    rec RECORD;
+    filas_actualizadas INTEGER;
 BEGIN
     -- Obtener longitud del string
     n := obtener_longitud_string();
@@ -33,31 +32,55 @@ BEGIN
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
     
-    -- Para cada posición i del string, calcular Xii
-    FOR i IN 1..n LOOP
-        -- Obtener el terminal en la posición i
-        terminal := get_token(i);
-        
-        -- Buscar todas las variables A tales que A→terminal
-        vars_array := obtener_vars_terminal(terminal);
-        
-        -- Insertar en la matriz
-        PERFORM set_xij(i, i, vars_array);
-        
-        -- Log para debugging
-        IF array_length(vars_array, 1) IS NOT NULL AND array_length(vars_array, 1) > 0 THEN
+    WITH tokens AS (
+        SELECT 
+            si.posicion AS i,
+            COALESCE(
+                ARRAY_AGG(DISTINCT pt.variable) FILTER (WHERE pt.variable IS NOT NULL),
+                ARRAY[]::TEXT[]
+            ) AS vars
+        FROM string_input si
+        LEFT JOIN prod_terminales pt
+               ON pt.terminal = si.token
+        GROUP BY si.posicion
+    )
+    INSERT INTO matriz_cyk (i, j, x)
+    SELECT 
+        t.i,
+        t.i,
+        t.vars
+    FROM tokens t
+    ON CONFLICT (i, j) DO UPDATE SET x = EXCLUDED.x;
+    
+    filas_actualizadas := 0;
+    FOR rec IN
+        SELECT 
+            si.posicion AS i,
+            si.token AS terminal,
+            COALESCE(
+                ARRAY_AGG(DISTINCT pt.variable) FILTER (WHERE pt.variable IS NOT NULL),
+                ARRAY[]::TEXT[]
+            ) AS vars
+        FROM string_input si
+        LEFT JOIN prod_terminales pt
+               ON pt.terminal = si.token
+        GROUP BY si.posicion, si.token
+        ORDER BY si.posicion
+    LOOP
+        filas_actualizadas := filas_actualizadas + 1;
+        IF array_length(rec.vars, 1) > 0 THEN
             RAISE NOTICE 'X[%,%] = % → terminal: "%"', 
-                i, i, 
-                array_to_string(vars_array, ', '), 
-                terminal;
+                rec.i, rec.i, 
+                array_to_string(rec.vars, ', '), 
+                rec.terminal;
         ELSE
             RAISE NOTICE 'X[%,%] = {} → terminal: "%" (no hay producciones)', 
-                i, i, terminal;
+                rec.i, rec.i, rec.terminal;
         END IF;
     END LOOP;
     
     RAISE NOTICE '';
-    RAISE NOTICE '✓ Fila base completada (%  celdas)', n;
+    RAISE NOTICE '✓ Fila base completada (% celdas)', filas_actualizadas;
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
 END;

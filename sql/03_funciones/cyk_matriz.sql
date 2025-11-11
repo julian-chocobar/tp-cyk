@@ -19,22 +19,14 @@
 
 SET search_path TO cyk;
 
-CREATE OR REPLACE FUNCTION setear_matriz(fila INTEGER)
+CREATE OR REPLACE FUNCTION cyk.setear_matriz(fila INTEGER)
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;
-    i INTEGER;
-    j INTEGER;
-    k INTEGER;
     longitud INTEGER;
-    vars_resultado TEXT[];
-    xik TEXT[];
-    xkj TEXT[];
-    var_b TEXT;
-    var_c TEXT;
-    vars_encontradas TEXT[];
-    combinaciones_probadas INTEGER;
-    combinaciones_exitosas INTEGER;
+    filas_afectadas INTEGER;
+    rec RECORD;
+    vars_actuales TEXT[];
 BEGIN
     -- Obtener longitud del string
     n := obtener_longitud_string();
@@ -71,90 +63,62 @@ BEGIN
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
     
-    -- Para cada celda Xij donde j - i + 1 = longitud
-    FOR i IN 1..(n - longitud + 1) LOOP
-        j := i + longitud - 1;
-        vars_resultado := '{}';
-        combinaciones_probadas := 0;
-        combinaciones_exitosas := 0;
-        
-        RAISE NOTICE '  ┌─ Procesando X[%,%] (subcadena posiciones % a %):', i, j, i, j;
-        
-        -- PROGRAMACIÓN DINÁMICA: Probar todas las particiones k
-        -- Para cada k, usamos resultados YA CALCULADOS: Xik y X(k+1)j
-        FOR k IN i..(j - 1) LOOP
-            -- Obtener celdas ya calculadas en filas anteriores
-            xik := get_xij(i, k);
-            xkj := get_xij(k + 1, j);
-            
-            RAISE NOTICE '  │  Partición k=% : X[%,%] × X[%,%]', 
-                k, i, k, k+1, j;
-            RAISE NOTICE '  │    X[%,%] = %', 
-                i, k, 
-                CASE 
-                    WHEN array_length(xik, 1) > 0 
-                    THEN '{' || array_to_string(xik, ', ') || '}'
-                    ELSE '{}'
-                END;
-            RAISE NOTICE '  │    X[%,%] = %', 
-                k+1, j,
-                CASE 
-                    WHEN array_length(xkj, 1) > 0 
-                    THEN '{' || array_to_string(xkj, ', ') || '}'
-                    ELSE '{}'
-                END;
-            
-            -- Si ambos conjuntos tienen variables, buscar producciones
-            IF array_length(xik, 1) > 0 AND array_length(xkj, 1) > 0 THEN
-                
-                -- Para cada combinación B ∈ Xik y C ∈ X(k+1)j
-                -- Usar CROSS JOIN con unnest (sugerencia del profesor)
-                FOR var_b, var_c IN 
-                    SELECT b.var AS var_b, c.var AS var_c
-                    FROM unnest(xik) AS b(var)
-                    CROSS JOIN unnest(xkj) AS c(var)
-                LOOP
-                    combinaciones_probadas := combinaciones_probadas + 1;
-                    
-                    -- Buscar producciones A → BC en la gramática
-                    vars_encontradas := obtener_vars_binarias(var_b, var_c);
-                    
-                    IF array_length(vars_encontradas, 1) > 0 THEN
-                        combinaciones_exitosas := combinaciones_exitosas + 1;
-                        
-                        RAISE NOTICE '  │      ✓ % → % % produce: %', 
-                            array_to_string(vars_encontradas, '/'),
-                            var_b, 
-                            var_c,
-                            array_to_string(vars_encontradas, ', ');
-                        
-                        -- Unir con resultado (programación dinámica: acumular)
-                        vars_resultado := union_arrays(vars_resultado, vars_encontradas);
-                    END IF;
-                END LOOP;
-            ELSE
-                RAISE NOTICE '  │      (conjuntos vacíos, no hay combinaciones)';
-            END IF;
-        END LOOP;
-        
-        -- Insertar resultado final en la matriz
-        PERFORM set_xij(i, j, vars_resultado);
-        
-        -- Log del resultado
-        RAISE NOTICE '  │';
-        RAISE NOTICE '  └─ RESULTADO: X[%,%] = %', 
-            i, j,
-            CASE 
-                WHEN array_length(vars_resultado, 1) > 0 
-                THEN '{' || array_to_string(vars_resultado, ', ') || '}'
-                ELSE '{}'
-            END;
-        RAISE NOTICE '     (Probadas: % combinaciones, Exitosas: %)', 
-            combinaciones_probadas, combinaciones_exitosas;
-        RAISE NOTICE '';
+    WITH spans AS (
+        SELECT 
+            gs AS i,
+            gs + longitud - 1 AS j
+        FROM generate_series(1, n - longitud + 1) AS gs
+    ),
+    particiones AS (
+        SELECT
+            s.i,
+            s.j,
+            generate_series(s.i, s.j - 1) AS k
+        FROM spans s
+    ),
+    combinaciones AS (
+        SELECT
+            p.i,
+            p.j,
+            COALESCE(
+                ARRAY_AGG(DISTINCT pb.variable) FILTER (WHERE pb.variable IS NOT NULL),
+                ARRAY[]::TEXT[]
+            ) AS vars
+        FROM particiones p
+        LEFT JOIN matriz_expandida b
+               ON b.i = p.i
+              AND b.j = p.k
+        LEFT JOIN matriz_expandida c
+               ON c.i = p.k + 1
+              AND c.j = p.j
+        LEFT JOIN prod_binarias pb
+               ON pb.var_b = b.variable
+              AND pb.var_c = c.variable
+        GROUP BY p.i, p.j
+    )
+    INSERT INTO matriz_cyk (i, j, x)
+    SELECT i, j, vars
+    FROM combinaciones
+    ON CONFLICT (i, j) DO UPDATE SET x = EXCLUDED.x;
+    
+    filas_afectadas := n - longitud + 1;
+    
+    FOR rec IN
+        SELECT 
+            gs AS i,
+            gs + longitud - 1 AS j,
+            get_xij(gs, gs + longitud - 1) AS vars
+        FROM generate_series(1, n - longitud + 1) AS gs
+    LOOP
+        vars_actuales := rec.vars;
+        IF array_length(vars_actuales, 1) > 0 THEN
+            RAISE NOTICE '  ✓ X[%,%] = {%}', rec.i, rec.j, array_to_string(vars_actuales, ', ');
+        ELSE
+            RAISE NOTICE '  ✓ X[%,%] = {}', rec.i, rec.j;
+        END IF;
     END LOOP;
     
-    RAISE NOTICE '✓ Fila % completada (% celdas)', fila, n - longitud + 1;
+    RAISE NOTICE '✓ Fila % completada (% celdas)', fila, filas_afectadas;
     RAISE NOTICE '═══════════════════════════════════════════════════════════';
     RAISE NOTICE '';
 END;
