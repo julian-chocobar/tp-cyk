@@ -1,9 +1,9 @@
-
 # Trabajo Práctico CYK - Parte 1: Gramática para JSON
 
 ### Símbolo inicial: J
 
 #### Producciones:
+
 ```
 (1)  J  → { }                          // objeto vacío
 (2)  J  → { L }                        // objeto con contenido
@@ -32,14 +32,18 @@
 (18) D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 (19) C → a | b | c | d | e | f | g | h | ... | z
 ```
-<!--  -->       
+
+<!--  -->
+
 #### Símbolos:
+
 - Variables: J, L, P, K, V, S, N, D, C
 - Terminales: {, }, [, ], ", ', :, ,, espacio, 0-9, a-z
 
 ## Ejemplo 1: `{"a":10}`
 
 ### Derivación más a la izquierda:
+
 ```
 J ⇒ { L }
   ⇒ { P }
@@ -54,6 +58,7 @@ J ⇒ { L }
 ```
 
 ### Árbol de Parsing:
+
 ```
                         J
                         |
@@ -78,6 +83,7 @@ J ⇒ { L }
 ## Ejemplo 2: `{"a":10,"b":'hola'}`
 
 ### Derivación más a la izquierda:
+
 ```
 J ⇒ { L }
   ⇒ { P , L }
@@ -95,6 +101,7 @@ J ⇒ { L }
 ```
 
 ### Árbol de Parsing (simplificado):
+
 ```
                               J
                               |
@@ -115,18 +122,20 @@ J ⇒ { L }
 ## Ejemplo 3 (con anidamiento): `{"a":10,"c":{"d":99}}`
 
 ### Derivación parcial:
+
 ```
 J ⇒ { L }
   ⇒ { P , L }
   ⇒ { " a " : 1 0 , P }
   ⇒ { " a " : 1 0 , " c " : V }
-  ⇒ { " a " : 1 0 , " c " : J }       
+  ⇒ { " a " : 1 0 , " c " : J }
   ⇒ { " a " : 1 0 , " c " : { L } }
   ⇒ { " a " : 1 0 , " c " : { P } }
   ⇒ { " a " : 1 0 , " c " : { " d " : 9 9 } }
 ```
 
 ### Árbol de Parsing (estructura):
+
 ```
                               J
                               |
@@ -154,6 +163,7 @@ J ⇒ { L }
 # Trabajo Práctico CYK - Parte 2: Transformación a FNC
 
 ### Gramática Inicial (de la Parte 1)
+
 ```
 J  → { } | { L }
 L  → P | P , L
@@ -171,6 +181,7 @@ C → a | b | c | ... | z
 ## PASO 1: Eliminar Producciones ε
 
 ### Identificar símbolos nulleables:
+
 ```
 Iteración 1:
 - S → ε  ⟹  S es nulleable
@@ -186,24 +197,28 @@ Símbolos nulleables: {S}
 Para cada producción que contiene S, generamos versiones con y sin S.
 
 **Producción V → ' S ':**
+
 - Original: V → ' S '
 - S es nulleable, entonces:
   - V → ' S ' (S presente)
   - V → ' ' (S ausente)
 
 **Producción S → C S:**
+
 - Original: S → C S
 - S es nulleable, entonces:
   - S → C S (S presente)
   - S → C (S ausente)
 
 **Producción S → espacio S:**
+
 - Original: S → espacio S
 - S es nulleable, entonces:
   - S → espacio S (S presente)
   - S → espacio (S ausente)
 
 ### Gramática después de eliminar ε:
+
 ```
 J  → { } | { L }
 L  → P | P , L
@@ -223,82 +238,98 @@ C → a | b | c | ... | z
 ### Identificar pares unitarios:
 
 **Caso base:**
+
 ```
-(J,J), (L,L), (P,P), (K,K), (V,V), 
+(J,J), (L,L), (P,P), (K,K), (V,V),
 (S,S), (N,N), (D,D), (C,C)
 ```
 
 **Caso inductivo:**
 
 De L → P:
+
 ```
 (L, P)
 ```
 
 De V → J:
+
 ```
 (V, J)
 ```
 
 De V → N:
+
 ```
 (V, N)
 ```
 
 De K → C:
+
 ```
 (K, C)
 ```
 
 De S → C:
+
 ```
 (S, C)
 ```
 
 De N → D:
+
 ```
 (N, D)
 ```
 
 De D → 0|1|...|9:
+
 ```
 (D, 0), (D, 1), ..., (D, 9)
 ```
 
 **Pares unitarios completos:**
+
 ```
-(L, P), (V, J), (V, N), (K, C), (S, C), 
+(L, P), (V, J), (V, N), (K, C), (S, C),
 (N, D), (D, 0), (D, 1), ..., (D, 9)
 ```
 
 ### Aplicar eliminación de unitarias:
 
 **Para L → P:**
+
 - P → " K " : V (no unitaria)
 - Agregar: L → " K " : V
 
 **Para V → J:**
+
 - J → { } (no unitaria)
 - J → { L } (no unitaria)
 - Agregar: V → { } | { L }
 
 **Para V → N:**
+
 - N → D | D N (no unitaria)
 - Agregar: V → D | D N
 
 **Para K → C:**
+
 - C → a | b | c | ... (no unitarias)
 - Agregar: K → a | b | c | ...
 
 **Para S → C:**
+
 - C → a | b | c | ... (no unitarias)
 - Agregar: S → a | b | c | ...
 
 **Para N → D:**
+
 - D → 0 | 1 | ... | 9 (no unitarias)
 - Agregar: N → 0 | 1 | ... | 9
 
 ### Gramática después de eliminar unitarias:
+
 ```
 J  → { } | { L }
 
@@ -326,11 +357,13 @@ C → a | b | c | d | e | f | g | h | ... | z
 ### Identificar símbolos generadores:
 
 **Iteración 1 (terminales):**
+
 ```
 Generadores: {, }, ", ', :, ,, espacio, 0, 1, 2, ..., 9, a, b, c, ..., z
 ```
 
 **Iteración 2:**
+
 ```
 - D → 0 (todos sus símbolos son generadores) ✓
 - C → a (todos sus símbolos son generadores) ✓
@@ -339,6 +372,7 @@ Generadores: {..., D, C}
 ```
 
 **Iteración 3:**
+
 ```
 - K → a (generador) ✓
 - K → C K (letra y K son generadores) ✓
@@ -351,6 +385,7 @@ Generadores: {..., K, S, número}
 ```
 
 **Iteración 4:**
+
 ```
 - V → ' ' (ambos terminales) ✓
 - V → ' S ' (todos generadores) ✓
@@ -362,6 +397,7 @@ Generadores: {..., V, P}
 ```
 
 **Iteración 5:**
+
 ```
 - L → " K " : V (todos generadores) ✓
 - L → P , L (todos generadores) ✓
@@ -370,6 +406,7 @@ Generadores: {..., L}
 ```
 
 **Iteración 6:**
+
 ```
 - J → { } (ambos terminales) ✓
 - J → { L } (todos generadores) ✓
@@ -386,11 +423,13 @@ Generadores: {..., J}
 ### Identificar símbolos alcanzables desde J:
 
 **Iteración 1:**
+
 ```
 Alcanzables: {J}
 ```
 
 **Iteración 2 (desde J):**
+
 ```
 J → { } | { L }
 Agregar: {, }, L
@@ -399,6 +438,7 @@ Alcanzables: {J, {, }, L}
 ```
 
 **Iteración 3 (desde L):**
+
 ```
 L → " K " : V | P , L
 Agregar: ", K, :, V, P, ,
@@ -407,6 +447,7 @@ Alcanzables: {J, {, }, L, ", K, :, V, P, ,}
 ```
 
 **Iteración 4 (desde K, V, P):**
+
 ```
 K → C K | a | b | c | ...
 V → ' S ' | ' ' | { } | { L } | D N
@@ -424,10 +465,12 @@ Alcanzables: {J, L, P, K, V, S, N, D, C, {, }, ", ', :, ,, espacio, 0-9, a-z}
 ## PASO 5: Conversión a Forma Normal de Chomsky (FNC)
 
 Necesitamos que cada producción sea:
+
 - **A → BC** (dos variables), o
 - **A → a** (un terminal)
 
 ### Gramática limpia (punto de partida):
+
 ```
 J  → { } | { L }
 L  → " K " : V | P , L
@@ -443,6 +486,7 @@ C → a | b | ... | z
 ### Sub-paso 5.1: Aislar terminales
 
 Para cada terminal que aparece en producciones de longitud ≥ 2, creamos una variable.
+
 ```
 T_llave_izq → {
 T_llave_der → }
@@ -462,27 +506,28 @@ T_z → z
 ```
 
 **Reemplazar en producciones largas:**
+
 ```
-J  → T_llave_izq T_llave_der 
+J  → T_llave_izq T_llave_der
    | T_llave_izq L T_llave_der
 
-L  → T_comilla K T_comilla T_dos_puntos V 
+L  → T_comilla K T_comilla T_dos_puntos V
    | P T_coma L
 
 P  → T_comilla K T_comilla T_dos_puntos V
 
-K  → C K 
+K  → C K
    | a | b | c | ... | z
 
-V  → T_apostrofe S T_apostrofe 
-   | T_apostrofe T_apostrofe 
-   | T_llave_izq T_llave_der 
-   | T_llave_izq L T_llave_der 
+V  → T_apostrofe S T_apostrofe
+   | T_apostrofe T_apostrofe
+   | T_llave_izq T_llave_der
+   | T_llave_izq L T_llave_der
    | D N
 
-S  → C S 
-   | T_espacio S 
-   | a | b | ... | z 
+S  → C S
+   | T_espacio S
+   | a | b | ... | z
    | espacio
 
 N → D N | 0 | 1 | ... | 9
@@ -497,12 +542,14 @@ C → a | b | ... | z
 Ahora todas las producciones tienen solo variables, pero algunas tienen más de 2.
 
 **J → T_llave_izq L T_llave_der** (3 símbolos)
+
 ```
 J → T_llave_izq Z1
 Z1 → L T_llave_der
 ```
 
 **L → T_comilla K T_comilla T_dos_puntos V** (5 símbolos)
+
 ```
 L → T_comilla Z2
 Z2 → K Z3
@@ -511,12 +558,14 @@ Z4 → T_dos_puntos V
 ```
 
 **L → P T_coma L** (3 símbolos)
+
 ```
 L → P Z5
 Z5 → T_coma L
 ```
 
 **P → T_comilla K T_comilla T_dos_puntos V** (5 símbolos)
+
 ```
 P → T_comilla Z6
 Z6 → K Z7
@@ -525,12 +574,14 @@ Z8 → T_dos_puntos V
 ```
 
 **V → T_apostrofe S T_apostrofe** (3 símbolos)
+
 ```
 V → T_apostrofe Z9
 Z9 → S T_apostrofe
 ```
 
 **V → T_llave_izq L T_llave_der** (3 símbolos)
+
 ```
 V → T_llave_izq Z10
 Z10 → L T_llave_der
@@ -543,14 +594,16 @@ Z10 → L T_llave_der
 ## GRAMÁTICA FINAL EN FNC
 
 ### Variables:
+
 ```
   J, L, P, K, V, S, N, D, C,
   Z1, Z2, Z3, Z4, Z5, Z6, Z7, Z8, Z9, Z10,
-  T_llave_izq, T_llave_der, T_comilla, T_apostrofe, 
+  T_llave_izq, T_llave_der, T_comilla, T_apostrofe,
   T_dos_puntos, T_coma, T_espacio, T_0, ..., T_9, T_a, ..., T_z
 ```
 
 ### Terminales:
+
 ```
   {, }, ", ', :, ,, espacio, 0-9, a-z
 ```
@@ -558,7 +611,9 @@ Z10 → L T_llave_der
 ### Símbolo Inicial: J
 
 ### PRODUCCIONES TIPO A → BC (dos variables):
-------------------------------------------
+
+---
+
 ```
 J → T_llave_izq T_llave_der
 J → T_llave_izq Z1
@@ -597,7 +652,9 @@ N → D N
 ```
 
 ### PRODUCCIONES TIPO A → a (un terminal):
----------------------------------------
+
+---
+
 ```
 T_llave_izq → {
 T_llave_der → }
@@ -663,6 +720,7 @@ C → z
 ### Ejemplo : `{"a":10}` con la gramática en FNC
 
 **Derivación (parcial, mostrando estructura):**
+
 ```
 J ⇒ T_llave_izq Z1
   ⇒ { Z1
@@ -683,6 +741,7 @@ J ⇒ T_llave_izq Z1
 ```
 
 **Árbol de parsing con FNC:**
+
 ```
                     J
                    / \
@@ -716,6 +775,7 @@ J ⇒ T_llave_izq Z1
 ### 📊 Tablas Principales
 
 1. **GLC_en_FNC**: Almacena la gramática en Forma Normal de Chomsky
+
    - `start`: Indica si es el símbolo inicial
    - `parte_izq`: Variable del lado izquierdo (A)
    - `parte_der1`: Primera parte del lado derecho (a o B)
@@ -723,10 +783,12 @@ J ⇒ T_llave_izq Z1
    - `tipo_produccion`: 1=Terminal (A→a), 2=Binaria (A→BC)
 
 2. **matriz_cyk**: Matriz triangular del algoritmo CYK
+
    - `i`, `j`: Coordenadas de la celda
    - `x`: Array de variables que derivan la subcadena i..j
 
 3. **string_input**: String tokenizado
+
    - `posicion`: Posición del token (1-indexed)
    - `token`: Carácter en esa posición
 
@@ -736,6 +798,7 @@ J ⇒ T_llave_izq Z1
 ### 🔄 Algoritmo CYK - Programación Dinámica
 
 El algoritmo implementa programación dinámica en tres niveles:
+
 ```
 cyk(string) → Boolean
   │
@@ -759,6 +822,7 @@ cyk(string) → Boolean
 ```
 
 **Características:**
+
 - ✅ **Caso base optimizado**: Función dedicada para fila 1
 - ✅ **Segunda fila optimizada**: Solo 1 partición posible
 - ✅ **Reutilización de resultados**: Programación dinámica pura
@@ -767,6 +831,7 @@ cyk(string) → Boolean
 ### 📈 Complejidad
 
 - **Tiempo**: O(n³ × |G|)
+
   - n = longitud del string
   - |G| = número de producciones en la gramática
 
@@ -776,10 +841,12 @@ cyk(string) → Boolean
 ## Instalación
 
 ### Requisitos
+
 - PostgreSQL 12 o superior
 - Cliente psql
 
 ### Pasos de Instalación
+
 ```bash
 # 1. Crear la base de datos
 createdb -U postgres tp_cyk
@@ -794,11 +861,14 @@ psql -U postgres -d tp_cyk -f sql/main.sql
 dropdb -U postgres tp_cyk
 ```
 
-
 ## Uso del Sistema
 
 ### Comandos Básicos
+
 ```sql
+-- Antes de ejecutar funciones en una nueva sesión
+SET search_path TO cyk;
+
 -- Conectar a la base de datos
 \c tp_cyk
 
@@ -819,6 +889,7 @@ SELECT * FROM cyk.verificar_gramatica();
 ```
 
 ### Ejemplos de Tests
+
 ```sql
 -- Test 1: Objeto vacío
 SELECT cyk.cyk('{}');
@@ -840,6 +911,7 @@ SELECT cyk.cyk('{"a":{"b":1}}');
 ```
 
 ## Estructura de Archivos
+
 ```
 tp-cyk/
 ├── README.md                      # Este archivo
@@ -875,34 +947,42 @@ tp-cyk/
 ## Ejecución Modular
 
 Puedes ejecutar componentes individuales:
+
 ```bash
 # Solo recrear las funciones CYK
 psql -U postgres -d tp_cyk -f sql/03_funciones/cyk_principal.sql
 
-# Solo ejecutar un test específico
-psql -d tp_cyk -f sql/05_tests/test_02_simple.sql
+# Ejecutar todos los tests
+psql -U postgres -d tp_cyk -f sql/05_tests/run_all_tests.sql
+
+# Ejecutar un test específico
+psql -U postgres -d tp_cyk -f sql/05_tests/test_01_vacio.sql
+psql -U postgres -d tp_cyk -f sql/05_tests/test_02_simple.sql
+psql -U postgres -d tp_cyk -f sql/05_tests/test_03_dos_pares.sql
+psql -U postgres -d tp_cyk -f sql/05_tests/test_04_string.sql
 
 # Recargar solo la gramática
-psql -d tp_cyk -c "DELETE FROM cyk.GLC_en_FNC;"
-psql -d tp_cyk -f sql/02_data/carga_gramatica_json.sql
+psql -U postgres -d tp_cyk -c "DELETE FROM cyk.GLC_en_FNC;"
+psql -U postgres -d tp_cyk -f sql/02_data/carga_gramatica_json.sql
 ```
 
 ## Visualización de Resultados
 
 ### Ver Gramática
+
 ```sql
 -- Vista formateada
 SELECT * FROM cyk.ver_gramatica;
 
 -- Estadísticas
-SELECT 
+SELECT
     COUNT(*) AS total_producciones,
     COUNT(*) FILTER (WHERE tipo_produccion = 1) AS terminales,
     COUNT(*) FILTER (WHERE tipo_produccion = 2) AS binarias
 FROM cyk.GLC_en_FNC;
 
 -- Producciones por variable
-SELECT 
+SELECT
     parte_izq,
     COUNT(*) AS cantidad
 FROM cyk.GLC_en_FNC
@@ -913,11 +993,12 @@ ORDER BY cantidad DESC;
 ### Ver Matriz CYK
 
 La función `mostrar_matriz()` devuelve una representación visual de la matriz triangular:
+
 ```
 MATRIZ CYK TRIANGULAR
 ==================================================
 
-Tokens: [{] ["] [a] ["] [:] [1] [0] [}] 
+Tokens: [{] ["] [a] ["] [:] [1] [0] [}]
 
 [J  ]
 [Z1 ][J  ]
@@ -928,16 +1009,19 @@ Tokens: [{] ["] [a] ["] [:] [1] [0] [}]
 [N  ][V  ][Z4 ][T_d][Z4 ][D,N]
 [T_l][Z1 ][V  ][Z4 ][T_d][N  ][D,N]
 ```
+
 ## Extensiones y Mejoras
 
 ### Agregar Nueva Gramática
 
 1. Limpiar gramática actual:
+
 ```sql
 DELETE FROM cyk.GLC_en_FNC;
 ```
 
 2. Insertar nueva gramática en FNC:
+
 ```sql
 -- Ejemplo: Expresiones aritméticas simples
 -- E → E + T | T
@@ -952,6 +1036,7 @@ INSERT INTO cyk.GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produ
 ```
 
 3. Probar:
+
 ```sql
 SELECT cyk.cyk('1+2');
 ```
@@ -959,17 +1044,20 @@ SELECT cyk.cyk('1+2');
 ### Optimizaciones Aplicadas
 
 1. **Índices estratégicos**:
+
    - Búsqueda rápida de producciones por terminal
    - Búsqueda rápida de producciones binarias
    - Índice en símbolo inicial
 
 2. **Views con unnest**:
+
    - Facilita queries sobre arrays
    - Mejor rendimiento en JOINs
 
 3. **Funciones especializadas**:
+
    - Fila base: O(n)
-   - Segunda fila: O(n) 
+   - Segunda fila: O(n)
    - Resto: O(n³)
 
 4. **RAISE NOTICE para debugging**:

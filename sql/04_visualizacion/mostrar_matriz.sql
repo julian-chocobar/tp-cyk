@@ -16,14 +16,15 @@ RETURNS TABLE (
 ) AS $$
 DECLARE
     n INTEGER;
-    i INTEGER;
-    j INTEGER;
+    i_idx INTEGER;
+    j_idx INTEGER;
     linea TEXT;
     celda TEXT;
     vars TEXT[];
     max_width INTEGER := 12;  -- Ancho máximo de cada celda
     str_actual TEXT;
     tokens_str TEXT;
+    celdas_llenas INTEGER;
 BEGIN
     -- Obtener longitud
     n := obtener_longitud_string();
@@ -65,17 +66,18 @@ BEGIN
     -- ========================================================================
     
     -- Fila por fila, de abajo (i=n) hacia arriba (i=1)
-    FOR i IN REVERSE n..1 LOOP
+    FOR i_idx IN REVERSE 1..n LOOP
         linea := '';
         
         -- Agregar espacios iniciales para formar el triángulo
-        FOR j IN 1..(i - 1) LOOP
+        FOR j_idx IN 1..(i_idx - 1) LOOP
             linea := linea || REPEAT(' ', max_width + 2);
         END LOOP;
         
         -- Agregar celdas de esta fila (desde j=i hasta j=n)
-        FOR j IN i..n LOOP
-            SELECT x INTO vars FROM matriz_cyk WHERE matriz_cyk.i = mostrar_matriz.i AND matriz_cyk.j = mostrar_matriz.j;
+        FOR j_idx IN i_idx..n LOOP
+            -- Obtener variables de la celda actual
+            SELECT x INTO vars FROM matriz_cyk WHERE matriz_cyk.i = i_idx AND matriz_cyk.j = j_idx;
             
             -- Formatear contenido de la celda
             IF vars IS NULL OR array_length(vars, 1) IS NULL THEN
@@ -93,7 +95,7 @@ BEGIN
         END LOOP;
         
         -- Agregar etiqueta de fila al final
-        linea := linea || '  ← fila ' || i;
+        linea := linea || '  ← fila ' || i_idx;
         
         RETURN QUERY SELECT linea::TEXT;
     END LOOP;
@@ -104,9 +106,9 @@ BEGIN
     -- ETIQUETAS DE COLUMNAS
     -- ========================================================================
     linea := '';
-    FOR j IN 1..n LOOP
-        linea := linea || REPEAT(' ', (j-1) * (max_width + 3));
-        linea := linea || '    col ' || j;
+    FOR j_idx IN 1..n LOOP
+        linea := linea || REPEAT(' ', (j_idx-1) * (max_width + 3));
+        linea := linea || '    col ' || j_idx;
         EXIT; -- Solo mostrar para la primera columna (como referencia)
     END LOOP;
     
@@ -120,15 +122,11 @@ BEGIN
     RETURN QUERY SELECT ('  • Total de celdas: ' || (n * (n + 1) / 2))::TEXT;
     
     -- Contar celdas no vacías
-    DECLARE
-        celdas_llenas INTEGER;
-    BEGIN
-        SELECT COUNT(*) INTO celdas_llenas
-        FROM matriz_cyk
-        WHERE x IS NOT NULL AND array_length(x, 1) > 0;
-        
-        RETURN QUERY SELECT ('  • Celdas con variables: ' || celdas_llenas)::TEXT;
-    END;
+    SELECT COUNT(*) INTO celdas_llenas
+    FROM matriz_cyk
+    WHERE x IS NOT NULL AND array_length(x, 1) > 0;
+    
+    RETURN QUERY SELECT ('  • Celdas con variables: ' || celdas_llenas)::TEXT;
     
     -- Mostrar celda final (resultado)
     SELECT x INTO vars FROM matriz_cyk WHERE matriz_cyk.i = 1 AND matriz_cyk.j = n;
@@ -176,8 +174,8 @@ RETURNS TABLE (
 ) AS $$
 DECLARE
     n INTEGER;
-    i INTEGER;
-    j INTEGER;
+    i_idx INTEGER;
+    j_idx INTEGER;
     linea TEXT;
     vars TEXT[];
     count_vars INTEGER;
@@ -194,17 +192,17 @@ BEGIN
     RETURN QUERY SELECT ''::TEXT;
     
     -- Mostrar matriz de abajo hacia arriba
-    FOR i IN REVERSE n..1 LOOP
+    FOR i_idx IN REVERSE 1..n LOOP
         linea := '';
         
         -- Espacios para el triángulo
-        FOR j IN 1..(i - 1) LOOP
+        FOR j_idx IN 1..(i_idx - 1) LOOP
             linea := linea || '    ';
         END LOOP;
         
         -- Celdas
-        FOR j IN i..n LOOP
-            SELECT x INTO vars FROM matriz_cyk WHERE matriz_cyk.i = mostrar_matriz_compacta.i AND matriz_cyk.j = mostrar_matriz_compacta.j;
+        FOR j_idx IN i_idx..n LOOP
+            SELECT x INTO vars FROM matriz_cyk WHERE matriz_cyk.i = i_idx AND matriz_cyk.j = j_idx;
             count_vars := COALESCE(array_length(vars, 1), 0);
             
             linea := linea || '[' || LPAD(count_vars::TEXT, 2, ' ') || '] ';

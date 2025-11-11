@@ -118,20 +118,13 @@ SELECT current_database() AS base_de_datos,
 -- ============================================================================
 
 \echo '═══════════════════════════════════════════════════════════════'
-\echo 'PASO 7/7: Ejecutando tests unitarios'
+\echo 'PASO 7/7: Tests unitarios (ejecutar manualmente si se desea)'
 \echo '═══════════════════════════════════════════════════════════════'
 \echo ''
-
-\i sql/05_tests/test_01_vacio.sql
+\echo 'Para correr todos los tests luego de la instalación:'
+\echo '  \i sql/05_tests/run_all_tests.sql'
 \echo ''
-
-\i sql/05_tests/test_02_simple.sql
-\echo ''
-
-\i sql/05_tests/test_03_dos_pares.sql
-\echo ''
-
-\i sql/05_tests/test_04_string.sql
+\echo 'Para correr un test individual, consultar README.md'
 \echo ''
 
 -- ============================================================================
@@ -151,23 +144,26 @@ SELECT current_database() AS base_de_datos,
 \echo 'COMANDOS ÚTILES'
 \echo '═══════════════════════════════════════════════════════════════'
 \echo ''
+\echo '  Antes de ejecutar funciones desde una nueva sesión:'
+\echo '    SET search_path TO cyk;'
+\echo ''
 \echo '  Ver gramática cargada:'
-\echo '    SELECT * FROM cyk.ver_gramatica;'
+\echo '    SELECT * FROM ver_gramatica;'
 \echo ''
 \echo '  Ejecutar algoritmo CYK:'
-\echo '    SELECT cyk.cyk(''{"a":10}'');'
+\echo '    SELECT cyk(''{"a":10}'');'
 \echo ''
 \echo '  Ver matriz resultante:'
-\echo '    SELECT * FROM cyk.mostrar_matriz();'
+\echo '    SELECT * FROM mostrar_matriz();'
 \echo ''
 \echo '  Limpiar datos para nueva ejecución:'
-\echo '    SELECT cyk.limpiar_datos();'
+\echo '    SELECT limpiar_datos();'
 \echo ''
 \echo '  Verificar gramática:'
-\echo '    SELECT * FROM cyk.verificar_gramatica();'
+\echo '    SELECT * FROM verificar_gramatica();'
 \echo ''
 \echo '  Ver estadísticas:'
-\echo '    SELECT COUNT(*) FROM cyk.GLC_en_FNC;'
+\echo '    SELECT COUNT(*) FROM GLC_en_FNC;'
 \echo ''
 \echo '═══════════════════════════════════════════════════════════════'
 \echo ''

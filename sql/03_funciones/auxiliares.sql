@@ -200,12 +200,11 @@ Retorna array vacío si la celda no existe o está vacía.';
 -- Establece el contenido de la celda (i,j) de la matriz
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION set_xij(i INTEGER, j INTEGER, variables TEXT[])
+CREATE OR REPLACE FUNCTION set_xij(param_i INTEGER, param_j INTEGER, variables TEXT[])
 RETURNS VOID AS $$
 BEGIN
-    -- CORRECCIÓN: Usar alias de tabla para evitar ambigüedad
     INSERT INTO matriz_cyk (i, j, x) 
-    VALUES (set_xij.i, set_xij.j, variables)
+    VALUES (param_i, param_j, variables)
     ON CONFLICT (i, j) 
     DO UPDATE SET x = EXCLUDED.x;
 END;
