@@ -1690,21 +1690,21 @@ T_rp → ')'
 DELETE FROM GLC_en_FNC;
 ```
 2. Insertar nueva gramática en FNC:
-```
+```sql
 INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion)
 VALUES
-(true,  'S', 'S',    'S',     2),
+(true,  'S', 'S', 'S', 2),
 
-(false, 'S', 'T_lp', 'Z1',    2),
+(false, 'S', 'T_lp', 'Z1', 2),
 (false, 'S', 'T_lp', 'T_rp',  2),
 
-(false, 'Z1', 'S',   'T_rp',  2),
+(false, 'Z1', 'S', 'T_rp',  2),
 
-(false, 'T_lp', '(', NULL,    1), 
-(false, 'T_rp', ')', NULL,    1); 
+(false, 'T_lp', '(', NULL, 1), 
+(false, 'T_rp', ')', NULL, 1); 
 ```
 3. Probar
-```
+```sql
 SELECT cyk('()');
 SELECT cyk('()()');
 SELECT cyk('(()())');
