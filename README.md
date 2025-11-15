@@ -1041,6 +1041,434 @@ Estas consultas también se listan en la sección de uso del sistema.
 
 Antes de realizar estas tareas, recordá ejecutar `SET search_path TO cyk;`.
 
+### Gramática para operaciones aritméticas simples
+```
+S → E                     # Punto de inicio: una expresión completa
+
+E → E + T                 # Suma: una expresión seguida de + y un término
+   | E - T                # Resta: una expresión seguida de - y un término
+   | T                    # Caso base: una expresión puede ser solo un término
+
+T → T * P                 # Multiplicación: un término seguido de * y un primario
+   | T / P                # División: un término seguido de / y un primario
+   | P                    # Caso base: un término puede ser solo un primario
+
+P → ( E )                 # Paréntesis: una expresión rodeada por paréntesis
+   | - P                  # Negación unaria: signo menos delante de un primario
+   | N                    # Un primario puede ser un número
+
+N → N D                   # Número con más de un dígito: concatenar dígitos
+   | D                    # Caso base: un número puede ser un único dígito
+
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9   # Dígitos del 0 al 9
+```
+###Transformación a FNC
+
+###PASO 1: Eliminar Producciones ε
+Ninguna produción es A → ε
+No hay producciones nulleables.
+
+###PASO 2: Eliminar producciones unitarias
+
+Caso base:
+```
+(S,S), (E,E), (T,T), (P,P), (N,N), (D,D)
+```
+Caso inductivo
+S → E
+```
+(S,E)
+```
+E → T
+```
+(E,T)
+```
+T → P
+```
+(T,P)
+```
+P → N
+```
+(P,N)
+```
+N → D
+```
+(N,D)
+```
+Aplicamos transitividad:
+
+Tenemos (S, E) y (E, T) ⇒ (S, T)
+
+Tenemos (S, T) y (T, P) ⇒ (S, P)
+
+Tenemos (S, P) y (P, N) ⇒ (S, N)
+
+Tenemos (S, N) y (N, D) ⇒ (S, D)
+
+De (E, T) y (T, P) ⇒ (E, P)
+
+De (E, P) y (P, N) ⇒ (E, N)
+
+De (E, N) y (N, D) ⇒ (E, D)
+
+De (T, P) y (P, N) ⇒ (T, N)
+
+De (T, N) y (N, D) ⇒ (T, D)
+
+De (P, N) y (N, D) ⇒ (P, D)
+
+###Aplicar eliminacion de unitarias
+Para S → E
+E → E + T
+E → E - T
+Agregamos:
+S → E + T
+S → E - T
+
+Para S → T
+T → T * P
+T → T / P
+Agregamos:
+S → T * P
+S → T / P
+
+Para S → P
+P → ( E )
+P → - P
+Agregamos:
+S → ( E )
+S → - P
+
+Para S → N
+N → N D
+Agregamos:
+S → N D
+
+Para S → D
+D → 0 | 1 | ... | 9
+Agregamos:
+S → 0 | 1 | ... | 9
+
+Realizamos el mismo procedimiento para E, T, P
+
+###Gramática después de eliminar producciones unitarias:
+```
+S → E + T | E - T | T * P | T / P | ( E ) | - P | N D
+S → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+E → E + T | E - T | T * P | T / P | ( E ) | - P | N D
+E → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+T → T * P | T / P | ( E ) | - P | N D
+T → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+P → ( E ) | - P | N D
+P → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+N → N D
+N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+```
+###PASO 3: Eliminar Símbolos No Generadores
+
+Iteración 1 (terminales):
+```
+Generadores: '+', '-', '*', '/', '(', ')', 0,1,2,3,4,5,6,7,8,9
+```
+Iteración 2:
+```
+D → 0 | 1 | ... | 9 (tiene producción directa a terminales)
+
+Generadores:{..., D}
+```
+Iteración 3:
+```
+N → 0 | 1 | ... | 9 (tiene producción directa a terminales)
+
+Generadores:{..., D, N}
+```
+Iteración 4:
+```
+P tiene P → N D con N,D generadores entonces P genera.
+
+Generadores:{..., D, N,P}
+```
+Iteración 5:
+```
+T tiene T → N D con N,D generadores entonces T genera.
+
+Generadores:{..., D, N,P,T}
+```
+Iteración 6:
+```
+E tiene E → N D con N,D generadores entonces E genera.
+
+Generadores:{..., D, N,P,T,E}
+```
+Iteración 7:
+```
+S tiene S → N D con N,D generadores entonces S genera.
+
+Generadores:{..., D, N,P,T,E,S}
+```
+Conclusión: Todos los símbolos son generadores ✓
+
+###PASO 4: Eliminar Símbolos No Alcanzables
+
+Producciones de S:
+
+S → E + T → añade E, T, y terminal +
+
+S → E - T → E, T, -
+
+S → T * P → T, P, *
+
+S → T / P → T, P, /
+
+S → ( E ) → (, E, )
+
+S → - P → -, P
+
+S → N D → N, D
+
+S → 0|1|...|9 → añade dígitos 0..9
+
+Agregamos: E, T, P, N, D y terminales +,-,*,/,(,),0..9.
+
+Alcanzables: { S, E, T, P, N, D, '+','-','*','/','(',')',0..9 }
+
+Observamos que todos los no terminales S,E,T,P,N,D y todos los terminales usados son alcanzables desde S.
+Por lo tanto,todos los símbolos son alcanzables ✓
+
+###PASO 5: Conversión a Forma Normal de Chomsky (FNC)
+
+Gramática limpia
+```
+S → E + T | E - T | T * P | T / P | ( E ) | - P | N D
+S → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+E → E + T | E - T | T * P | T / P | ( E ) | - P | N D
+E → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+T → T * P | T / P | ( E ) | - P | N D
+T → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+P → ( E ) | - P | N D
+P → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+N → N D
+N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+```
+###Aislamos terminales
+```
+T_suma → +
+T_resta → -
+T_mul → *
+T_div → /
+T_lp → (
+T_rp → )
+T_0 → 0
+T_1 → 1
+T_2 → 2
+T_3 → 3
+T_4 → 4
+T_5 → 5
+T_6 → 6
+T_7 → 7
+T_8 → 8
+T_9 → 9
+```
+Reemplazamos en producciones largas
+```
+S → E T_suma T
+   | E T_resta T
+   | T T_mul P
+   | T T_div P
+   | T_lp E T_rp
+   | T_resta P
+   | N D
+   | 0 | 1 | ... | 9
+
+E → E T_suma T
+   | E T_resta T
+   | T T_mul P
+   | T T_div P
+   | T_lp E T_rp
+   | T_resta P
+   | N D
+   | 0 | 1 | ... | 9
+
+T → T T_mul P
+   | T T_div P
+   | T_lp E T_rp
+   | T_resta P
+   | N D
+   | 0 | 1 | ... | 9
+
+P → T_lp E T_rp
+   | T_resta P
+   | N D
+   | 0 | 1 | ... | 9
+
+N → N D
+  | 0 | 1 | ... | 9
+
+D → 0 | 1 | ... | 9
+```
+###Descomponemos producciones largas
+
+Para S:
+```
+S → E Z1
+Z1 → T_suma T
+
+S → E Z2
+Z2 → T_resta T
+
+S → T Z3
+Z3 → T_mul P
+
+S → T Z4
+Z4 → T_div P
+
+S → T_lp Z5
+Z5 → E T_rp
+```
+
+Para E:
+```
+E → E Z6
+Z6 → T_suma T
+
+E → E Z7
+Z7 → T_resta T
+
+E → T Z8
+Z8 → T_mul P
+
+E → T Z9
+Z9 → T_div P
+
+E → T_lp Z10
+Z10 → E T_rp
+```
+
+Para T:
+```
+T → T Z11
+Z11 → T_mul P
+
+T → T Z12
+Z12 → T_div P
+
+T → T_lp Z13
+Z13 → E T_rp
+```
+
+Para P:
+```
+P → T_lp Z14
+Z14 → E T_rp
+```
+
+###GRAMÁTICA FINAL EN FNC
+
+##Variables:
+```
+S, E, T, P, N, D,
+Z1, Z2, Z3, Z4, Z5,
+Z6, Z7, Z8, Z9, Z10,
+Z11, Z12, Z13, Z14,
+T_suma, T_resta, T_mul, T_div, T_lp, T_rp,
+T_0, T_1, T_2, T_3, T_4, T_5, T_6, T_7, T_8, T_9
+```
+##Terminales:
+```
++ , - , * , / , ( , ) , 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9
+```
+Símbolo Inicial: S
+
+###PRODUCCIONES TIPO A → BC (dos variables):
+```
+S → E Z1
+Z1 → T_suma T
+
+S → E Z2
+Z2 → T_resta T
+
+S → T Z3
+Z3 → T_mul P
+
+S → T Z4
+Z4 → T_div P
+
+S → T_lp Z5
+Z5 → E T_rp
+
+S → T_resta P
+S → N D
+
+E → E Z6
+Z6 → T_suma T
+
+E → E Z7
+Z7 → T_resta T
+
+E → T Z8
+Z8 → T_mul P
+
+E → T Z9
+Z9 → T_div P
+
+E → T_lp Z10
+Z10 → E T_rp
+
+E → T_resta P
+E → N D
+
+T → T Z11
+Z11 → T_mul P
+
+T → T Z12
+Z12 → T_div P
+
+T → T_lp Z13
+Z13 → E T_rp
+
+T → T_resta P
+T → N D
+
+P → T_lp Z14
+Z14 → E T_rp
+
+P → T_resta P
+P → N D
+
+N → N D
+```
+###PRODUCCIONES TIPO A → a (un terminal):
+```
+T_suma → +
+T_resta → -
+T_mul → *
+T_div → /
+T_lp → (
+T_rp → )
+
+T_0 → 0
+T_1 → 1
+T_2 → 2
+T_3 → 3
+T_4 → 4
+T_5 → 5
+T_6 → 6
+T_7 → 7
+T_8 → 8
+T_9 → 9
+```
 ### Agregar Nueva Gramática
 
 1. Limpiar gramática actual:
