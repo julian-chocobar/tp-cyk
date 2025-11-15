@@ -1062,13 +1062,13 @@ N → N D                   # Número con más de un dígito: concatenar dígito
 
 D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9   # Dígitos del 0 al 9
 ```
-###Transformación a FNC
+### Transformación a FNC
 
-###PASO 1: Eliminar Producciones ε
+### PASO 1: Eliminar Producciones ε
 Ninguna produción es A → ε
 No hay producciones nulleables.
 
-###PASO 2: Eliminar producciones unitarias
+### PASO 2: Eliminar producciones unitarias
 
 Caso base:
 ```
@@ -1117,7 +1117,7 @@ De (T, N) y (N, D) ⇒ (T, D)
 
 De (P, N) y (N, D) ⇒ (P, D)
 
-###Aplicar eliminacion de unitarias
+### Aplicar eliminacion de unitarias
 Para S → E
 E → E + T
 E → E - T
@@ -1151,7 +1151,7 @@ S → 0 | 1 | ... | 9
 
 Realizamos el mismo procedimiento para E, T, P
 
-###Gramática después de eliminar producciones unitarias:
+### Gramática después de eliminar producciones unitarias:
 ```
 S → E + T | E - T | T * P | T / P | ( E ) | - P | N D
 S → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
@@ -1170,7 +1170,7 @@ N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 ```
-###PASO 3: Eliminar Símbolos No Generadores
+### PASO 3: Eliminar Símbolos No Generadores
 
 Iteración 1 (terminales):
 ```
@@ -1214,7 +1214,7 @@ Generadores:{..., D, N,P,T,E,S}
 ```
 Conclusión: Todos los símbolos son generadores ✓
 
-###PASO 4: Eliminar Símbolos No Alcanzables
+### PASO 4: Eliminar Símbolos No Alcanzables
 
 Producciones de S:
 
@@ -1241,7 +1241,7 @@ Alcanzables: { S, E, T, P, N, D, '+','-','*','/','(',')',0..9 }
 Observamos que todos los no terminales S,E,T,P,N,D y todos los terminales usados son alcanzables desde S.
 Por lo tanto,todos los símbolos son alcanzables ✓
 
-###PASO 5: Conversión a Forma Normal de Chomsky (FNC)
+### PASO 5: Conversión a Forma Normal de Chomsky (FNC)
 
 Gramática limpia
 ```
@@ -1262,7 +1262,7 @@ N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 ```
-###Aislamos terminales
+### Aislamos terminales
 ```
 T_suma → +
 T_resta → -
@@ -1318,7 +1318,7 @@ N → N D
 
 D → 0 | 1 | ... | 9
 ```
-###Descomponemos producciones largas
+### Descomponemos producciones largas
 
 Para S:
 ```
@@ -1374,9 +1374,9 @@ P → T_lp Z14
 Z14 → E T_rp
 ```
 
-###GRAMÁTICA FINAL EN FNC
+### GRAMÁTICA FINAL EN FNC
 
-##Variables:
+## Variables:
 ```
 S, E, T, P, N, D,
 Z1, Z2, Z3, Z4, Z5,
@@ -1385,13 +1385,13 @@ Z11, Z12, Z13, Z14,
 T_suma, T_resta, T_mul, T_div, T_lp, T_rp,
 T_0, T_1, T_2, T_3, T_4, T_5, T_6, T_7, T_8, T_9
 ```
-##Terminales:
+## Terminales:
 ```
 + , - , * , / , ( , ) , 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9
 ```
 Símbolo Inicial: S
 
-###PRODUCCIONES TIPO A → BC (dos variables):
+### PRODUCCIONES TIPO A → BC (dos variables):
 ```
 S → E Z1
 Z1 → T_suma T
@@ -1449,7 +1449,7 @@ P → N D
 
 N → N D
 ```
-###PRODUCCIONES TIPO A → a (un terminal):
+### PRODUCCIONES TIPO A → a (un terminal):
 ```
 T_suma → +
 T_resta → -
@@ -1478,6 +1478,176 @@ DELETE FROM GLC_en_FNC;
 ```
 
 2. Insertar nueva gramática en FNC:
+```sql
+INSERT INTO GLC_en_FNC VALUES 
+(true,'S','E','Z1',2),
+(false,'Z1','T_suma','T',2),
+
+(false,'S','E','Z2',2),
+(false,'Z2','T_resta','T',2),
+
+(false,'S','T','Z3',2),
+(false,'Z3','T_mul','P',2),
+
+(false,'S','T','Z4',2),
+(false,'Z4','T_div','P',2),
+
+(false,'S','T_lp','Z5',2),
+(false,'Z5','E','T_rp',2),
+
+(false,'S','T_resta','P',2),
+
+(false,'S','N','D',2),
+
+(false,'S','0',NULL,1),
+(false,'S','1',NULL,1),
+(false,'S','2',NULL,1),
+(false,'S','3',NULL,1),
+(false,'S','4',NULL,1),
+(false,'S','5',NULL,1),
+(false,'S','6',NULL,1),
+(false,'S','7',NULL,1),
+(false,'S','8',NULL,1),
+(false,'S','9',NULL,1);
+
+-- ===========================
+-- E
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'E','E','Z6',2),
+(false,'Z6','T_suma','T',2),
+
+(false,'E','E','Z7',2),
+(false,'Z7','T_resta','T',2),
+
+(false,'E','T','Z8',2),
+(false,'Z8','T_mul','P',2),
+
+(false,'E','T','Z9',2),
+(false,'Z9','T_div','P',2),
+
+(false,'E','T_lp','Z10',2),
+(false,'Z10','E','T_rp',2),
+
+(false,'E','T_resta','P',2),
+
+(false,'E','N','D',2),
+
+(false,'E','0',NULL,1),
+(false,'E','1',NULL,1),
+(false,'E','2',NULL,1),
+(false,'E','3',NULL,1),
+(false,'E','4',NULL,1),
+(false,'E','5',NULL,1),
+(false,'E','6',NULL,1),
+(false,'E','7',NULL,1),
+(false,'E','8',NULL,1),
+(false,'E','9',NULL,1);
+
+-- ===========================
+-- T
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'T','T','Z11',2),
+(false,'Z11','T_mul','P',2),
+
+(false,'T','T','Z12',2),
+(false,'Z12','T_div','P',2),
+
+(false,'T','T_lp','Z13',2),
+(false,'Z13','E','T_rp',2),
+
+(false,'T','T_resta','P',2),
+
+(false,'T','N','D',2),
+
+(false,'T','0',NULL,1),
+(false,'T','1',NULL,1),
+(false,'T','2',NULL,1),
+(false,'T','3',NULL,1),
+(false,'T','4',NULL,1),
+(false,'T','5',NULL,1),
+(false,'T','6',NULL,1),
+(false,'T','7',NULL,1),
+(false,'T','8',NULL,1),
+(false,'T','9',NULL,1);
+
+-- ===========================
+-- P
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'P','T_lp','Z14',2),
+(false,'Z14','E','T_rp',2),
+
+(false,'P','T_resta','P',2),
+
+(false,'P','N','D',2),
+
+(false,'P','0',NULL,1),
+(false,'P','1',NULL,1),
+(false,'P','2',NULL,1),
+(false,'P','3',NULL,1),
+(false,'P','4',NULL,1),
+(false,'P','5',NULL,1),
+(false,'P','6',NULL,1),
+(false,'P','7',NULL,1),
+(false,'P','8',NULL,1),
+(false,'P','9',NULL,1);
+
+-- ===========================
+-- N
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'N','N','D',2),
+
+(false,'N','0',NULL,1),
+(false,'N','1',NULL,1),
+(false,'N','2',NULL,1),
+(false,'N','3',NULL,1),
+(false,'N','4',NULL,1),
+(false,'N','5',NULL,1),
+(false,'N','6',NULL,1),
+(false,'N','7',NULL,1),
+(false,'N','8',NULL,1),
+(false,'N','9',NULL,1);
+
+-- ===========================
+-- D
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'D','0',NULL,1),
+(false,'D','1',NULL,1),
+(false,'D','2',NULL,1),
+(false,'D','3',NULL,1),
+(false,'D','4',NULL,1),
+(false,'D','5',NULL,1),
+(false,'D','6',NULL,1),
+(false,'D','7',NULL,1),
+(false,'D','8',NULL,1),
+(false,'D','9',NULL,1);
+
+-- ===========================
+-- TERMINALES
+-- ===========================
+INSERT INTO GLC_en_FNC VALUES
+(false,'T_suma','+',NULL,1),
+(false,'T_resta','-',NULL,1),
+(false,'T_mul','*',NULL,1),
+(false,'T_div','/',NULL,1),
+(false,'T_lp','(',NULL,1),
+(false,'T_rp',')',NULL,1),
+
+(false,'T_0','0',NULL,1),
+(false,'T_1','1',NULL,1),
+(false,'T_2','2',NULL,1),
+(false,'T_3','3',NULL,1),
+(false,'T_4','4',NULL,1),
+(false,'T_5','5',NULL,1),
+(false,'T_6','6',NULL,1),
+(false,'T_7','7',NULL,1),
+(false,'T_8','8',NULL,1),
+(false,'T_9','9',NULL,1);
+```
 
 ```sql
 -- Ejemplo: Expresiones aritméticas simples
@@ -1495,7 +1665,51 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 3. Probar:
 
 ```sql
-SELECT cyk('1+2');
+SELECT cyk('1+2'); 
+SELECT cyk('9*(4-1)');
+SELECT cyk('5/(4-1');
+```
+
+### Gramática para paréntesis balanceados
+
+```
+S → S S | (S) | ()
+```
+
+En FNC:
+```
+S  → S S
+S  → T_lp Z1
+S  → T_lp T_rp
+Z1 → S T_rp
+T_lp → '('
+T_rp → ')'
+```
+1. Limpiar gramática actual:
+```
+DELETE FROM GLC_en_FNC;
+```
+2. Insertar nueva gramática en FNC:
+```
+INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion)
+VALUES
+(true,  'S', 'S',    'S',     2),
+
+(false, 'S', 'T_lp', 'Z1',    2),
+(false, 'S', 'T_lp', 'T_rp',  2),
+
+(false, 'Z1', 'S',   'T_rp',  2),
+
+(false, 'T_lp', '(', NULL,    1), 
+(false, 'T_rp', ')', NULL,    1); 
+```
+3. Probar
+```
+SELECT cyk('()');
+SELECT cyk('()()');
+SELECT cyk('(()())');
+
+SELECT cyk(')('); 
 ```
 
 ### Optimizaciones Aplicadas
