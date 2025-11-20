@@ -17,9 +17,7 @@
 --
 -- ============================================================================
 
-SET search_path TO cyk;
-
-CREATE OR REPLACE FUNCTION cyk.setear_matriz(fila INTEGER)
+CREATE OR REPLACE FUNCTION setear_matriz(fila INTEGER)
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;

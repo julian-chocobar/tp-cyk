@@ -8,8 +8,6 @@
 -- Estructura: { "clave" : valor_numérico }
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- Encabezado del test
 DO $$
 BEGIN

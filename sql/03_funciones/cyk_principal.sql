@@ -16,8 +16,6 @@
 --
 -- ============================================================================
 
-SET search_path TO cyk;
-
 CREATE OR REPLACE FUNCTION cyk(input_string TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -162,7 +160,7 @@ BEGIN
     
     RAISE NOTICE '';
     RAISE NOTICE 'Para ver la matriz completa ejecute:';
-    RAISE NOTICE '  SELECT * FROM cyk.mostrar_matriz();';
+    RAISE NOTICE '  SELECT * FROM mostrar_matriz();';
     RAISE NOTICE '';
     
     -- Registrar la ejecución
@@ -218,6 +216,6 @@ BEGIN
     RAISE NOTICE '╚════════════════════════════════════════════════════════════════╝';
     RAISE NOTICE '';
     RAISE NOTICE 'Ejemplo de uso:';
-    RAISE NOTICE '  SELECT cyk.cyk(''{"a":10}'');';
+    RAISE NOTICE '  SELECT cyk(''{"a":10}'');';
     RAISE NOTICE '';
 END $$;

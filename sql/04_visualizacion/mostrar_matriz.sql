@@ -3,8 +3,6 @@
 -- Función para mostrar la matriz triangular de forma visual
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- FUNCIÓN: mostrar_matriz
 -- Muestra la matriz CYK en formato triangular visual

@@ -3,8 +3,6 @@
 -- Queries y views para mostrar la gramática de forma legible
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- VIEW: ver_gramatica
 -- Vista principal para visualizar la gramática

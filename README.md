@@ -883,9 +883,6 @@ dropdb -U postgres tp_cyk
 ### Comandos Básicos
 
 ```sql
--- Configurar el search_path (ejecutar una vez por sesión)
-SET search_path TO cyk;
-
 -- Conectar a la base de datos
 \c tp_cyk
 
@@ -972,7 +969,7 @@ psql -U postgres -d tp_cyk -f sql/05_tests/test_03_dos_pares.sql
 psql -U postgres -d tp_cyk -f sql/05_tests/test_04_string.sql
 
 # Recargar solo la gramática
-psql -U postgres -d tp_cyk -c "DELETE FROM cyk.GLC_en_FNC;"
+psql -U postgres -d tp_cyk -c "DELETE FROM GLC_en_FNC;"
 psql -U postgres -d tp_cyk -f sql/02_data/carga_gramatica_json.sql
 ```
 
@@ -1022,7 +1019,7 @@ Tokens: [{] ["] [a] ["] [:] [1] [0] [}]
 
 ## Parte 4: Consultas de Visualización
 
-Para cumplir con los requerimientos de la Parte 4, podés ejecutar las siguientes consultas (recordá ejecutar `SET search_path TO cyk;` en la sesión actual):
+Para cumplir con los requerimientos de la Parte 4, podés ejecutar las siguientes consultas:
 
 ```sql
 -- Mostrar la gramática almacenada en FNC
@@ -1038,8 +1035,6 @@ SELECT * FROM mostrar_matriz_compacta();
 Estas consultas también se listan en la sección de uso del sistema.
 
 ## Parte 5: Extensiones y Mejoras
-
-Antes de realizar estas tareas, recordá ejecutar `SET search_path TO cyk;`.
 
 ### Gramática para operaciones aritméticas simples
 ```

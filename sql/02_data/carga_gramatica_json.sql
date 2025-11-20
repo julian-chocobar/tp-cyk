@@ -3,8 +3,6 @@
 -- Gramática resultado de la transformación de la Parte 2
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- Limpiar gramática existente (si hay)
 DELETE FROM GLC_en_FNC;
 

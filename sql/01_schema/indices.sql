@@ -3,8 +3,6 @@
 -- Mejoran el rendimiento de las búsquedas frecuentes
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- ÍNDICES EN GLC_en_FNC
 -- ============================================================================
@@ -94,7 +92,7 @@ DECLARE
 BEGIN
     SELECT COUNT(*) INTO total_indices
     FROM pg_indexes
-    WHERE schemaname = 'cyk';
+    WHERE schemaname = 'public';
     
     RAISE NOTICE 'Índices creados exitosamente: %', total_indices;
 END $$;

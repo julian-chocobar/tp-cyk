@@ -3,8 +3,6 @@
 -- Funciones helper utilizadas por el algoritmo CYK
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- FUNCIÓN: limpiar_datos
 -- Limpia todas las tablas de trabajo para una nueva ejecución

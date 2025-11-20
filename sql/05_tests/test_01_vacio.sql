@@ -8,8 +8,6 @@
 -- Producción esperada: J → { }
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- Encabezado del test
 DO $$
 BEGIN

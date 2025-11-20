@@ -11,9 +11,7 @@
 --
 -- ============================================================================
 
-SET search_path TO cyk;
-
-CREATE OR REPLACE FUNCTION cyk.setear_segunda_fila()
+CREATE OR REPLACE FUNCTION setear_segunda_fila()
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;
@@ -50,10 +48,10 @@ BEGIN
                 ARRAY[]::TEXT[]
             ) AS vars
         FROM pares p
-        LEFT JOIN cyk.matriz_expandida b
+        LEFT JOIN matriz_expandida b
                ON b.i = p.i
               AND b.j = p.i
-        LEFT JOIN cyk.matriz_expandida c
+        LEFT JOIN matriz_expandida c
                ON c.i = p.j
               AND c.j = p.j
         LEFT JOIN prod_binarias pb

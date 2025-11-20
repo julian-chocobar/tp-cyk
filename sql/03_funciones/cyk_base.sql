@@ -10,9 +10,7 @@
 --
 -- ============================================================================
 
-SET search_path TO cyk;
-
-CREATE OR REPLACE FUNCTION cyk.setear_fila_base()
+CREATE OR REPLACE FUNCTION setear_fila_base()
 RETURNS VOID AS $$
 DECLARE
     n INTEGER;

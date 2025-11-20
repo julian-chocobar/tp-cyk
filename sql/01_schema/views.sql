@@ -3,8 +3,6 @@
 -- Facilitan consultas y uso de unnest (sugerencia del profesor)
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- VIEW: matriz_expandida
 -- Expande los arrays de variables usando unnest
@@ -120,7 +118,7 @@ DECLARE
 BEGIN
     SELECT COUNT(*) INTO total_views
     FROM information_schema.views
-    WHERE table_schema = 'cyk';
+    WHERE table_schema = 'public';
     
     RAISE NOTICE 'Views creadas exitosamente: %', total_views;
     RAISE NOTICE '  ✓ matriz_expandida (con unnest)';

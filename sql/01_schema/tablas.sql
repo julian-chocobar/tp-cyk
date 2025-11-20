@@ -3,8 +3,6 @@
 -- Tablas principales del sistema CYK
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- TABLA: GLC_en_FNC
 -- Almacena la gramática en Forma Normal de Chomsky
@@ -100,7 +98,7 @@ DECLARE
 BEGIN
     SELECT COUNT(*) INTO total_tablas
     FROM information_schema.tables
-    WHERE table_schema = 'cyk'
+    WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE';
     
     RAISE NOTICE 'Tablas creadas exitosamente: %', total_tablas;

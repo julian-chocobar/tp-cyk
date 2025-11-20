@@ -3,8 +3,6 @@
 -- Funciones adicionales para mantenimiento y debugging
 -- ============================================================================
 
-SET search_path TO cyk;
-
 -- ============================================================================
 -- FUNCIÓN: verificar_gramatica
 -- Verifica la integridad de la gramática cargada
