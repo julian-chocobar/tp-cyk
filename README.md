@@ -303,10 +303,18 @@ De D → 0|1|...|9:
 (D, 0), (D, 1), ..., (D, 9)
 ```
 
+**Aplicar transitividad:**
+
+De (V, N) y (N, D):
+
+```
+(V, D)
+```
+
 **Pares unitarios completos:**
 
 ```
-(L, P), (V, J), (V, N), (K, C), (S, C),
+(L, P), (V, J), (V, N), (V, D), (K, C), (S, C),
 (N, D), (D, 0), (D, 1), ..., (D, 9)
 ```
 
@@ -327,6 +335,11 @@ De D → 0|1|...|9:
 
 - N → D | D N (no unitaria)
 - Agregar: V → D | D N
+
+**Para V → D (transitivo):**
+
+- D → 0 | 1 | ... | 9 (no unitarias, son terminales)
+- Agregar: V → 0 | 1 | ... | 9
 
 **Para K → C:**
 
@@ -354,7 +367,7 @@ P  → " K " : V
 
 K  → C K | a | b | c | d | e | f | g | h | ... | z
 
-V  → ' S ' | ' ' | { } | { L } | D N | D
+V  → ' S ' | ' ' | { } | { L } | D N | 0 | 1 | ... | 9
 
 S  → C S | espacio S | a | b | c | ... | z | espacio
 
@@ -717,6 +730,11 @@ N → 1
 ... (todos los dígitos)
 N → 9
 
+V → 0
+V → 1
+... (todos los dígitos)
+V → 9
+
 D → 0
 D → 1
 ... (todos los dígitos)
@@ -887,7 +905,7 @@ dropdb -U postgres tp_cyk
 \c tp_cyk
 
 -- Ver la gramática cargada
-SELECT * FROM ver_gramatica();
+SELECT * FROM ver_gramatica;
 
 -- Ejecutar el algoritmo CYK
 SELECT cyk('{"a":10}');
@@ -920,8 +938,12 @@ SELECT cyk('{"a":''hola''}');
 -- Test 5: String con espacios
 SELECT cyk('{"nombre":''Juan Perez''}');
 
--- Test 6: Anidamiento
+-- Test 6: Anidamiento simple
 SELECT cyk('{"a":{"b":1}}');
+
+-- Test 6: Anidamiento
+SELECT cyk('{"a":10,"b":''hola'',"c":{"d":''chau'',"e":99,"g":{"h":12}},"f":{}}');
+
 ```
 
 ### Estructura de Archivos

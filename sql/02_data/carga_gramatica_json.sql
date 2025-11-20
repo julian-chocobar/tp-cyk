@@ -54,7 +54,7 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'V', 'T_apostrofe', 'T_apostrofe', 2),    -- V → ' '  (string vacío)
 (FALSE, 'V', 'T_llave_izq', 'T_llave_der', 2),    -- V → { }  (objeto vacío)
 (FALSE, 'V', 'T_llave_izq', 'Z10', 2),            -- V → { Z10 (objeto con contenido)
-(FALSE, 'V', 'D', 'N', 2);                        -- V → D N  (número)
+(FALSE, 'V', 'D', 'N', 2);                        -- V → D N  (número de múltiples dígitos)
 
 -- Variables auxiliares para V
 INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
@@ -118,6 +118,23 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'N', '7', NULL, 1),
 (FALSE, 'N', '8', NULL, 1),
 (FALSE, 'N', '9', NULL, 1);
+
+-- ----------------------------------------------------------------------------
+-- V también puede derivar dígitos directamente (caso base para números de un dígito)
+-- Esto viene de V → N → D después de eliminar producciones unitarias
+-- ----------------------------------------------------------------------------
+
+INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
+(FALSE, 'V', '0', NULL, 1),
+(FALSE, 'V', '1', NULL, 1),
+(FALSE, 'V', '2', NULL, 1),
+(FALSE, 'V', '3', NULL, 1),
+(FALSE, 'V', '4', NULL, 1),
+(FALSE, 'V', '5', NULL, 1),
+(FALSE, 'V', '6', NULL, 1),
+(FALSE, 'V', '7', NULL, 1),
+(FALSE, 'V', '8', NULL, 1),
+(FALSE, 'V', '9', NULL, 1);
 
 -- ----------------------------------------------------------------------------
 -- Caracteres/Letras: C → a|b|c|...|z

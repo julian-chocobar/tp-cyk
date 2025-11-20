@@ -20,11 +20,6 @@
 \echo '╚════════════════════════════════════════════════════════════════╝'
 \echo ''
 
--- Mostrar información de la base de datos
-\echo '>>> Base de datos actual:'
-SELECT current_database() AS base_de_datos, 
-       version() AS version_postgresql;
-\echo ''
 
 -- ============================================================================
 -- PASO 1: CONFIGURACIÓN INICIAL

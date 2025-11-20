@@ -32,11 +32,11 @@ Este TP se realiza con fines didácticos, para comprobar en forma práctica el c
 Los strings a reconocer son expresiones **JSON sencillas** que respondan al siguiente formato:
 
 ```text
-{"a":{0}
-{"a":{0,"b":"hola"}
-{"a":"hola","b":"chau","c":"}
-{"a":{0,"b":"hola","c":{"d":"chau","e":"99},"f":{}}
-{"a":{0,"b":"hola","c":{"d":"chau","e":"99,"g":{"h":12}},"f":{}}
+{"a":10}
+{"a":10,"b":’hola’}
+{“a”:’hola’,”b”:’chau’,”c”:’’} {“a”:10,”b”:’hola’,“c”:{“d”:’chau’,”e”:99},”f”:{}}
+{} 
+{“a”:10,”b”:’hola’,“c”:{“d”:’chau’,”e”:99,”g”:{“h”:12}},”f”:{}}
 
 ```
 
