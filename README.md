@@ -3,7 +3,17 @@
 ## Índice
 
 - [Parte 1: Gramática para JSON](#parte-1-gramática-para-json)
+  - [Símbolo inicial y Producciones](#símbolo-inicial-j)
+  - [Ejemplo 1: Objeto simple](#ejemplo-1-jsona10)
+  - [Ejemplo 2: Múltiples pares](#ejemplo-2-jsona10bhola)
+  - [Ejemplo 3: Anidamiento](#ejemplo-3-con-anidamiento-jsona10cd99)
 - [Parte 2: Transformación a FNC](#parte-2-transformación-a-fnc)
+  - [PASO 1: Eliminar Producciones ε](#paso-1-eliminar-producciones-ε)
+  - [PASO 2: Eliminar Producciones Unitarias](#paso-2-eliminar-producciones-unitarias)
+  - [PASO 3: Eliminar Símbolos No Generadores](#paso-3-eliminar-símbolos-no-generadores)
+  - [PASO 4: Eliminar Símbolos No Alcanzables](#paso-4-eliminar-símbolos-no-alcanzables)
+  - [PASO 5: Conversión a Forma Normal de Chomsky (FNC)](#paso-5-conversión-a-forma-normal-de-chomsky-fnc)
+  - [Gramática Final en FNC](#gramática-final-en-fnc)
 - [Parte 3: Implementación en PostgreSQL](#parte-3-implementación-en-postgresql)
   - [Instalación](#instalación)
   - [Uso del Sistema](#uso-del-sistema)
@@ -11,11 +21,17 @@
   - [Tests](#tests)
   - [Visualización de Resultados](#visualización-de-resultados)
 - [Parte 4: Consultas de Visualización](#parte-4-consultas-de-visualización)
+  - [Visualización de la Gramática](#visualización-de-la-gramática)
+  - [Visualización de la Matriz CYK](#visualización-de-la-matriz-cyk)
+  - [Ejemplos de Uso Completo](#ejemplos-de-uso-completo)
 - [Parte 5: Extensiones y Mejoras](#parte-5-extensiones-y-mejoras)
+  - [Gramática para Operaciones Aritméticas](#gramática-para-operaciones-aritméticas-simples)
+  - [Gramática para Paréntesis Balanceados](#gramática-para-paréntesis-balanceados)
+  - [Optimizaciones Aplicadas](#optimizaciones-aplicadas)
 
 ## Parte 1: Gramática para JSON
 
-### Símbolo inicial: J
+### Símbolo inicial: J {#símbolo-inicial-j}
 
 #### Producciones:
 
@@ -55,7 +71,7 @@
 - Variables: J, L, P, K, V, S, N, D, C
 - Terminales: {, }, [, ], ", ', :, ,, espacio, 0-9, a-z
 
-## Ejemplo 1: `{"a":10}`
+## Ejemplo 1: `{"a":10}` {#ejemplo-1-jsona10}
 
 ### Derivación más a la izquierda:
 
@@ -95,7 +111,7 @@ J ⇒ { L }
                                        0
 ```
 
-## Ejemplo 2: `{"a":10,"b":'hola'}`
+## Ejemplo 2: `{"a":10,"b":'hola'}` {#ejemplo-2-jsona10bhola}
 
 ### Derivación más a la izquierda:
 
@@ -134,7 +150,7 @@ J ⇒ { L }
                                10
 ```
 
-## Ejemplo 3 (con anidamiento): `{"a":10,"c":{"d":99}}`
+## Ejemplo 3 (con anidamiento): `{"a":10,"c":{"d":99}}` {#ejemplo-3-con-anidamiento-jsona10cd99}
 
 ### Derivación parcial:
 
@@ -174,6 +190,8 @@ J ⇒ { L }
                                          |
                                      "d":99
 ```
+
+---
 
 ## Parte 2: Transformación a FNC
 
@@ -619,7 +637,7 @@ Z10 → L T_llave_der
 
 ---
 
-## GRAMÁTICA FINAL EN FNC
+## GRAMÁTICA FINAL EN FNC {#gramática-final-en-fnc}
 
 ### Variables:
 
@@ -801,6 +819,8 @@ J ⇒ T_llave_izq Z1
                          1      0
 ```
 
+---
+
 ## Parte 3: Implementación en PostgreSQL
 
 ### Arquitectura del Sistema
@@ -960,7 +980,10 @@ tp-cyk/
 │   │   └── views.sql              # Vistas auxiliares
 │   ├── 02_data/                   # Datos de la gramática
 │   │   ├── carga_gramatica_json.sql
-│   │   └── verificar_carga.sql
+│   │   ├── verificar_carga.sql
+│   │   └── extensiones/       # Gramáticas adicionales
+│   │       ├── carga_gramatica_aritmetica.sql
+│   │       └── carga_gramatica_parentesis.sql
 │   ├── 03_funciones/              # Funciones del algoritmo
 │   │   ├── auxiliares.sql         # Funciones helper
 │   │   ├── cyk_base.sql           # Fila base (caso base)
@@ -1039,26 +1062,164 @@ Tokens: [{] ["] [a] ["] [:] [1] [0] [}]
 [T_l][Z1 ][V  ][Z4 ][T_d][N  ][D,N]
 ```
 
+---
+
 ## Parte 4: Consultas de Visualización
 
-Para cumplir con los requerimientos de la Parte 4, podés ejecutar las siguientes consultas:
+Para cumplir con los requerimientos de la Parte 4, el sistema proporciona múltiples funciones y vistas para visualizar la gramática y la matriz CYK.
+
+### Visualización de la Gramática
+
+#### 1. Vista `ver_gramatica`
+Muestra todas las producciones de la gramática en formato legible:
 
 ```sql
--- Mostrar la gramática almacenada en FNC
-SELECT * FROM ver_gramatica();
+-- Ver todas las producciones
+SELECT * FROM ver_gramatica;
 
--- Mostrar la matriz CYK en formato triangular completo
+-- Filtrar por variable específica
+SELECT * FROM ver_gramatica WHERE variable = 'J';
+
+-- Ver solo producciones terminales
+SELECT * FROM ver_gramatica WHERE tipo = 'Terminal';
+
+-- Ver solo producciones binarias
+SELECT * FROM ver_gramatica WHERE tipo = 'Binaria';
+```
+
+#### 2. Función `mostrar_gramatica_agrupada()`
+Muestra la gramática agrupada por variable, con todas las producciones de cada variable en una sola línea:
+
+```sql
+SELECT * FROM mostrar_gramatica_agrupada();
+```
+
+**Ejemplo de salida:**
+```
+variable | es_inicial | producciones
+---------+------------+------------------------------------------
+J        | t          | T_llave_izq T_llave_der | T_llave_izq Z1
+V        | f          | T_apostrofe Z9 | T_apostrofe T_apostrofe | ...
+```
+
+#### 3. Función `mostrar_estadisticas_detalladas()`
+Muestra estadísticas detalladas por variable (total de producciones, terminales, binarias):
+
+```sql
+SELECT * FROM mostrar_estadisticas_detalladas();
+```
+
+**Ejemplo de salida:**
+```
+variable | total_prods | prod_terminales | prod_binarias | es_inicial
+---------+-------------+-----------------+---------------+------------
+J        | 2           | 0               | 2             | ✓
+V        | 15          | 10              | 5             | 
+```
+
+#### 4. Función `buscar_produccion(simbolo)`
+Busca todas las producciones que contengan un símbolo específico (en el lado izquierdo o derecho):
+
+```sql
+-- Buscar todas las producciones que involucren 'V'
+SELECT * FROM buscar_produccion('V');
+
+-- Buscar producciones que involucren 'J'
+SELECT * FROM buscar_produccion('J');
+
+-- Buscar producciones que involucren un terminal
+SELECT * FROM buscar_produccion('{');
+```
+
+### Visualización de la Matriz CYK
+
+#### 1. Función `mostrar_matriz()`
+Muestra la matriz CYK completa en formato triangular visual:
+
+```sql
+-- Primero ejecutar el algoritmo CYK
+SELECT cyk('{"a":10}');
+
+-- Luego visualizar la matriz
 SELECT * FROM mostrar_matriz();
+```
 
--- (Opcional) Mostrar la matriz CYK en formato compacto
+**Características:**
+- Muestra la matriz de forma triangular (fila base abajo, celda final arriba)
+- Cada celda muestra las variables que derivan esa subcadena
+- Incluye información adicional: total de celdas, celdas con variables, celda final
+
+#### 2. Función `mostrar_matriz_compacta()`
+Versión compacta que solo muestra la cantidad de variables por celda:
+
+```sql
 SELECT * FROM mostrar_matriz_compacta();
 ```
 
-Estas consultas también se listan en la sección de uso del sistema.
+**Útil para:**
+- Vista rápida del llenado de la matriz
+- Identificar celdas con muchas variables (posibles puntos de análisis)
+
+#### 3. Función `mostrar_camino_derivacion(desde_i, desde_j)`
+Función experimental para mostrar información sobre una celda específica:
+
+```sql
+-- Mostrar información de la celda X[1,8] (celda final para string de 8 tokens)
+SELECT * FROM mostrar_camino_derivacion(1, 8);
+
+-- Analizar una subcadena específica
+SELECT * FROM mostrar_camino_derivacion(2, 5);
+```
+
+**Nota:** La reconstrucción completa del árbol de parsing requiere información adicional que no se almacena en la implementación actual.
+
+### Ejemplos de Uso Completo
+
+```sql
+-- 1. Ver la gramática completa
+SELECT * FROM ver_gramatica;
+
+-- 2. Ver estadísticas de la gramática
+SELECT * FROM mostrar_estadisticas_detalladas();
+
+-- 3. Ejecutar el algoritmo CYK
+SELECT cyk('{"a":10,"b":99}');
+
+-- 4. Ver la matriz resultante
+SELECT * FROM mostrar_matriz();
+
+-- 5. Ver versión compacta
+SELECT * FROM mostrar_matriz_compacta();
+
+-- 6. Buscar producciones específicas
+SELECT * FROM buscar_produccion('V');
+SELECT * FROM buscar_produccion('L');
+
+-- 7. Ver gramática agrupada
+SELECT * FROM mostrar_gramatica_agrupada();
+```
+
+### Guardar Resultados en Archivo
+
+Para guardar la visualización en un archivo:
+
+```sql
+-- Guardar matriz en archivo
+\o matriz_resultado.txt
+SELECT * FROM mostrar_matriz();
+\o
+
+-- Guardar gramática en archivo
+\o gramatica.txt
+SELECT * FROM ver_gramatica;
+\o
+```
+
+---
 
 ## Parte 5: Extensiones y Mejoras
 
-### Gramática para operaciones aritméticas simples
+### Gramática para operaciones aritméticas simples {#gramática-para-operaciones-aritméticas-simples}
 ```
 S → E                     # Punto de inicio: una expresión completa
 
@@ -1170,20 +1331,15 @@ Realizamos el mismo procedimiento para E, T, P
 
 ### Gramática después de eliminar producciones unitarias:
 ```
-S → E + T | E - T | T * P | T / P | ( E ) | - P | N D
-S → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+S → E + T | E - T | T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-E → E + T | E - T | T * P | T / P | ( E ) | - P | N D
-E → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+E → E + T | E - T | T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-T → T * P | T / P | ( E ) | - P | N D
-T → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+T → T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-P → ( E ) | - P | N D
-P → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+P → ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-N → N D
-N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+N → N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 ```
@@ -1260,26 +1416,12 @@ Por lo tanto,todos los símbolos son alcanzables ✓
 
 ### PASO 5: Conversión a Forma Normal de Chomsky (FNC)
 
-Gramática limpia
-```
-S → E + T | E - T | T * P | T / P | ( E ) | - P | N D
-S → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+#### Sub-paso 5.1: Aislar terminales
 
-E → E + T | E - T | T * P | T / P | ( E ) | - P | N D
-E → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+**Regla importante:** Solo aislamos terminales que aparecen en producciones de longitud ≥ 2. Para producciones de longitud 1 (como `S → 0`), NO necesitamos aislar el terminal; podemos tener directamente `S → 0`.
 
-T → T * P | T / P | ( E ) | - P | N D
-T → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+Creamos variables terminales solo para los operadores y paréntesis (que aparecen en producciones de longitud ≥ 2):
 
-P → ( E ) | - P | N D
-P → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-N → N D
-N → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-```
-### Aislamos terminales
 ```
 T_suma → +
 T_resta → -
@@ -1287,18 +1429,31 @@ T_mul → *
 T_div → /
 T_lp → (
 T_rp → )
-T_0 → 0
-T_1 → 1
-T_2 → 2
-T_3 → 3
-T_4 → 4
-T_5 → 5
-T_6 → 6
-T_7 → 7
-T_8 → 8
-T_9 → 9
 ```
-Reemplazamos en producciones largas
+
+**Nota:** Los dígitos (0-9) NO necesitan ser aislados porque:
+- Aparecen en producciones de longitud 1: `S → 0`, `D → 0`, etc.
+- En FNC, las producciones terminales son `A → a` donde `a` es un terminal literal
+- Por lo tanto, `S → 0` es válido en FNC (no necesitamos `S → T_0`)
+
+#### Sub-paso 5.2: Descomponer producciones largas
+
+Gramática limpia (después de eliminar unitarias):
+```
+S → E + T | E - T | T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+E → E + T | E - T | T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+T → T * P | T / P | ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+P → ( E ) | - P | N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+N → N D | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+```
+
+Reemplazamos terminales en producciones de longitud ≥ 2:
 ```
 S → E T_suma T
    | E T_resta T
@@ -1307,7 +1462,7 @@ S → E T_suma T
    | T_lp E T_rp
    | T_resta P
    | N D
-   | 0 | 1 | ... | 9
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos (NO T_0...T_9)
 
 E → E T_suma T
    | E T_resta T
@@ -1316,24 +1471,24 @@ E → E T_suma T
    | T_lp E T_rp
    | T_resta P
    | N D
-   | 0 | 1 | ... | 9
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos
 
 T → T T_mul P
    | T T_div P
    | T_lp E T_rp
    | T_resta P
    | N D
-   | 0 | 1 | ... | 9
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos
 
 P → T_lp E T_rp
    | T_resta P
    | N D
-   | 0 | 1 | ... | 9
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos
 
 N → N D
-  | 0 | 1 | ... | 9
+   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos
 
-D → 0 | 1 | ... | 9
+D → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9    ← Terminales directos
 ```
 ### Descomponemos producciones largas
 
@@ -1399,9 +1554,11 @@ S, E, T, P, N, D,
 Z1, Z2, Z3, Z4, Z5,
 Z6, Z7, Z8, Z9, Z10,
 Z11, Z12, Z13, Z14,
-T_suma, T_resta, T_mul, T_div, T_lp, T_rp,
-T_0, T_1, T_2, T_3, T_4, T_5, T_6, T_7, T_8, T_9
+T_suma, T_resta, T_mul, T_div, T_lp, T_rp
 ```
+
+**Nota:** Los dígitos (0-9) son terminales literales, no variables. No necesitamos `T_0...T_9` porque los dígitos solo aparecen en producciones de longitud 1 (`A → a`), que son válidas en FNC.
+
 ## Terminales:
 ```
 + , - , * , / , ( , ) , 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9
@@ -1475,225 +1632,117 @@ T_div → /
 T_lp → (
 T_rp → )
 
-T_0 → 0
-T_1 → 1
-T_2 → 2
-T_3 → 3
-T_4 → 4
-T_5 → 5
-T_6 → 6
-T_7 → 7
-T_8 → 8
-T_9 → 9
+S → 0
+S → 1
+S → 2
+S → 3
+S → 4
+S → 5
+S → 6
+S → 7
+S → 8
+S → 9
+
+E → 0
+E → 1
+E → 2
+E → 3
+E → 4
+E → 5
+E → 6
+E → 7
+E → 8
+E → 9
+
+T → 0
+T → 1
+T → 2
+T → 3
+T → 4
+T → 5
+T → 6
+T → 7
+T → 8
+T → 9
+
+P → 0
+P → 1
+P → 2
+P → 3
+P → 4
+P → 5
+P → 6
+P → 7
+P → 8
+P → 9
+
+N → 0
+N → 1
+N → 2
+N → 3
+N → 4
+N → 5
+N → 6
+N → 7
+N → 8
+N → 9
+
+D → 0
+D → 1
+D → 2
+D → 3
+D → 4
+D → 5
+D → 6
+D → 7
+D → 8
+D → 9
 ```
 ### Agregar Nueva Gramática
 
-1. Limpiar gramática actual:
+**Nota importante:** Antes de cargar una gramática de extensión, asegúrate de que el sistema base esté instalado ejecutando `sql/main.sql`.
 
-```sql
-DELETE FROM GLC_en_FNC;
+#### Gramática de Operaciones Aritméticas
+
+Para cargar la gramática de operaciones aritméticas:
+
+```bash
+# Limpiar y cargar gramática aritmética
+psql -U postgres -d tp_cyk -f sql/02_data/extensiones/carga_gramatica_aritmetica.sql
 ```
 
-2. Insertar nueva gramática en FNC:
-```sql
-INSERT INTO GLC_en_FNC VALUES 
-(true,'S','E','Z1',2),
-(false,'Z1','T_suma','T',2),
-
-(false,'S','E','Z2',2),
-(false,'Z2','T_resta','T',2),
-
-(false,'S','T','Z3',2),
-(false,'Z3','T_mul','P',2),
-
-(false,'S','T','Z4',2),
-(false,'Z4','T_div','P',2),
-
-(false,'S','T_lp','Z5',2),
-(false,'Z5','E','T_rp',2),
-
-(false,'S','T_resta','P',2),
-
-(false,'S','N','D',2),
-
-(false,'S','0',NULL,1),
-(false,'S','1',NULL,1),
-(false,'S','2',NULL,1),
-(false,'S','3',NULL,1),
-(false,'S','4',NULL,1),
-(false,'S','5',NULL,1),
-(false,'S','6',NULL,1),
-(false,'S','7',NULL,1),
-(false,'S','8',NULL,1),
-(false,'S','9',NULL,1);
-
--- ===========================
--- E
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'E','E','Z6',2),
-(false,'Z6','T_suma','T',2),
-
-(false,'E','E','Z7',2),
-(false,'Z7','T_resta','T',2),
-
-(false,'E','T','Z8',2),
-(false,'Z8','T_mul','P',2),
-
-(false,'E','T','Z9',2),
-(false,'Z9','T_div','P',2),
-
-(false,'E','T_lp','Z10',2),
-(false,'Z10','E','T_rp',2),
-
-(false,'E','T_resta','P',2),
-
-(false,'E','N','D',2),
-
-(false,'E','0',NULL,1),
-(false,'E','1',NULL,1),
-(false,'E','2',NULL,1),
-(false,'E','3',NULL,1),
-(false,'E','4',NULL,1),
-(false,'E','5',NULL,1),
-(false,'E','6',NULL,1),
-(false,'E','7',NULL,1),
-(false,'E','8',NULL,1),
-(false,'E','9',NULL,1);
-
--- ===========================
--- T
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'T','T','Z11',2),
-(false,'Z11','T_mul','P',2),
-
-(false,'T','T','Z12',2),
-(false,'Z12','T_div','P',2),
-
-(false,'T','T_lp','Z13',2),
-(false,'Z13','E','T_rp',2),
-
-(false,'T','T_resta','P',2),
-
-(false,'T','N','D',2),
-
-(false,'T','0',NULL,1),
-(false,'T','1',NULL,1),
-(false,'T','2',NULL,1),
-(false,'T','3',NULL,1),
-(false,'T','4',NULL,1),
-(false,'T','5',NULL,1),
-(false,'T','6',NULL,1),
-(false,'T','7',NULL,1),
-(false,'T','8',NULL,1),
-(false,'T','9',NULL,1);
-
--- ===========================
--- P
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'P','T_lp','Z14',2),
-(false,'Z14','E','T_rp',2),
-
-(false,'P','T_resta','P',2),
-
-(false,'P','N','D',2),
-
-(false,'P','0',NULL,1),
-(false,'P','1',NULL,1),
-(false,'P','2',NULL,1),
-(false,'P','3',NULL,1),
-(false,'P','4',NULL,1),
-(false,'P','5',NULL,1),
-(false,'P','6',NULL,1),
-(false,'P','7',NULL,1),
-(false,'P','8',NULL,1),
-(false,'P','9',NULL,1);
-
--- ===========================
--- N
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'N','N','D',2),
-
-(false,'N','0',NULL,1),
-(false,'N','1',NULL,1),
-(false,'N','2',NULL,1),
-(false,'N','3',NULL,1),
-(false,'N','4',NULL,1),
-(false,'N','5',NULL,1),
-(false,'N','6',NULL,1),
-(false,'N','7',NULL,1),
-(false,'N','8',NULL,1),
-(false,'N','9',NULL,1);
-
--- ===========================
--- D
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'D','0',NULL,1),
-(false,'D','1',NULL,1),
-(false,'D','2',NULL,1),
-(false,'D','3',NULL,1),
-(false,'D','4',NULL,1),
-(false,'D','5',NULL,1),
-(false,'D','6',NULL,1),
-(false,'D','7',NULL,1),
-(false,'D','8',NULL,1),
-(false,'D','9',NULL,1);
-
--- ===========================
--- TERMINALES
--- ===========================
-INSERT INTO GLC_en_FNC VALUES
-(false,'T_suma','+',NULL,1),
-(false,'T_resta','-',NULL,1),
-(false,'T_mul','*',NULL,1),
-(false,'T_div','/',NULL,1),
-(false,'T_lp','(',NULL,1),
-(false,'T_rp',')',NULL,1),
-
-(false,'T_0','0',NULL,1),
-(false,'T_1','1',NULL,1),
-(false,'T_2','2',NULL,1),
-(false,'T_3','3',NULL,1),
-(false,'T_4','4',NULL,1),
-(false,'T_5','5',NULL,1),
-(false,'T_6','6',NULL,1),
-(false,'T_7','7',NULL,1), 
-(false,'T_8','8',NULL,1),
-(false,'T_9','9',NULL,1);
-```
+O desde psql:
 
 ```sql
--- Ejemplo: Expresiones aritméticas simples
--- E → E + T | T
--- T → ( E ) | num
-
--- En FNC:
-INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
-(TRUE, 'E', 'E', 'X1', 2),
-(FALSE, 'X1', 'Plus', 'T', 2),
-(FALSE, 'E', 'T', NULL, 1),  -- Espera, esto es unitaria!
--- ... (completar correctamente en FNC)
+-- Limpiar y cargar gramática aritmética
+\i sql/02_data/extensiones/carga_gramatica_aritmetica.sql
 ```
 
-3. Probar:
+**Probar la gramática:**
 
 ```sql
-SELECT cyk('1+2'); 
-SELECT cyk('9*(4-1)');
-SELECT cyk('5/(4-1');
+-- Limpiar datos de ejecución anterior
+SELECT limpiar_datos();
+
+-- Ejemplos válidos
+SELECT cyk('1+2');           -- TRUE
+SELECT cyk('9*(4-1)');       -- TRUE
+SELECT cyk('-5+3');          -- TRUE
+SELECT cyk('10+20*3');       -- TRUE
+
+-- Ejemplos inválidos
+SELECT cyk('5/(4-1');        -- FALSE (falta paréntesis de cierre)
+SELECT cyk('1++2');          -- FALSE (sintaxis inválida)
 ```
 
-### Gramática para paréntesis balanceados
+### Gramática para Paréntesis Balanceados {#gramática-para-paréntesis-balanceados}
 
+**Gramática original:**
 ```
 S → S S | (S) | ()
 ```
 
-En FNC:
+**En FNC:**
 ```
 S  → S S
 S  → T_lp Z1
@@ -1702,34 +1751,40 @@ Z1 → S T_rp
 T_lp → '('
 T_rp → ')'
 ```
-1. Limpiar gramática actual:
+
+**Para cargar la gramática:**
+
+```bash
+# Limpiar y cargar gramática de paréntesis
+psql -U postgres -d tp_cyk -f sql/02_data/extensiones/carga_gramatica_parentesis.sql
 ```
-DELETE FROM GLC_en_FNC;
-```
-2. Insertar nueva gramática en FNC:
+
+O desde psql:
+
 ```sql
-INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion)
-VALUES
-(true,  'S', 'S', 'S', 2),
-
-(false, 'S', 'T_lp', 'Z1', 2),
-(false, 'S', 'T_lp', 'T_rp',  2),
-
-(false, 'Z1', 'S', 'T_rp',  2),
-
-(false, 'T_lp', '(', NULL, 1), 
-(false, 'T_rp', ')', NULL, 1); 
+-- Limpiar y cargar gramática de paréntesis
+\i sql/02_data/extensiones/carga_gramatica_parentesis.sql
 ```
-3. Probar
+
+**Probar la gramática:**
+
 ```sql
-SELECT cyk('()');
-SELECT cyk('()()');
-SELECT cyk('(()())');
+-- Limpiar datos de ejecución anterior
+SELECT limpiar_datos();
 
-SELECT cyk(')('); 
+-- Ejemplos válidos
+SELECT cyk('()');            -- TRUE
+SELECT cyk('()()');          -- TRUE
+SELECT cyk('(()())');         -- TRUE
+SELECT cyk('((()))');         -- TRUE
+
+-- Ejemplos inválidos
+SELECT cyk(')(');            -- FALSE (desbalanceado)
+SELECT cyk('(()');            -- FALSE (falta cierre)
+SELECT cyk('())');            -- FALSE (desbalanceado)
 ```
 
-### Optimizaciones Aplicadas
+### Optimizaciones Aplicadas {#optimizaciones-aplicadas}
 
 1. **Índices estratégicos**:
 

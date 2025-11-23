@@ -56,7 +56,7 @@ BEGIN
     RETURN QUERY
     SELECT 
         parte_izq AS variable,
-        MAX(start) AS es_inicial,
+        BOOL_OR(start) AS es_inicial,
         STRING_AGG(
             CASE 
                 WHEN tipo_produccion = 1 THEN parte_der1
@@ -68,7 +68,7 @@ BEGIN
     FROM GLC_en_FNC
     GROUP BY parte_izq
     ORDER BY 
-        MAX(start::INTEGER) DESC,
+        BOOL_OR(start) DESC,
         parte_izq;
 END;
 $$ LANGUAGE plpgsql;
@@ -100,11 +100,11 @@ BEGIN
         COUNT(*)::INTEGER AS total_prods,
         COUNT(*) FILTER (WHERE tipo_produccion = 1)::INTEGER AS prod_terminales,
         COUNT(*) FILTER (WHERE tipo_produccion = 2)::INTEGER AS prod_binarias,
-        CASE WHEN MAX(start) THEN '✓' ELSE '' END AS es_inicial
+        CASE WHEN BOOL_OR(start) THEN '✓' ELSE '' END AS es_inicial
     FROM GLC_en_FNC
     GROUP BY parte_izq
     ORDER BY 
-        MAX(start::INTEGER) DESC,
+        BOOL_OR(start) DESC,
         COUNT(*) DESC,
         parte_izq;
 END;
