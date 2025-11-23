@@ -1661,7 +1661,7 @@ INSERT INTO GLC_en_FNC VALUES
 (false,'T_4','4',NULL,1),
 (false,'T_5','5',NULL,1),
 (false,'T_6','6',NULL,1),
-(false,'T_7','7',NULL,1),
+(false,'T_7','7',NULL,1), 
 (false,'T_8','8',NULL,1),
 (false,'T_9','9',NULL,1);
 ```
@@ -1751,3 +1751,5 @@ SELECT cyk(')(');
 4. **RAISE NOTICE para debugging**:
    - Trace completo del algoritmo
    - Útil para entender el flujo
+
+   
