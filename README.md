@@ -1596,19 +1596,6 @@ SELECT * FROM mostrar_matriz_compacta();
 - Vista rápida del llenado de la matriz
 - Identificar celdas con muchas variables (posibles puntos de análisis)
 
-#### 3. Función `mostrar_camino_derivacion(desde_i, desde_j)`
-Función experimental para mostrar información sobre una celda específica:
-
-```sql
--- Mostrar información de la celda X[1,8] (celda final para string de 8 tokens)
-SELECT * FROM mostrar_camino_derivacion(1, 8);
-
--- Analizar una subcadena específica
-SELECT * FROM mostrar_camino_derivacion(2, 5);
-```
-
-**Nota:** La reconstrucción completa del árbol de parsing requiere información adicional que no se almacena en la implementación actual.
-
 ### Ejemplos de Uso Completo
 
 ```sql
