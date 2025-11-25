@@ -689,23 +689,11 @@ T_espacio → espacio
 
 T_0 → 0
 T_1 → 1
-T_2 → 2
-T_3 → 3
-T_4 → 4
-T_5 → 5
-T_6 → 6
-T_7 → 7
-T_8 → 8
+... (continuar para todos los dígitos)
 T_9 → 9
 
 T_a → a
 T_b → b
-T_c → c
-T_d → d
-T_e → e
-T_f → f
-T_g → g
-T_h → h
 ... (continuar para todas las letras)
 T_z → z
 
