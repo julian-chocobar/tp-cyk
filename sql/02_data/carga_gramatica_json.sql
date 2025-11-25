@@ -137,7 +137,7 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'V', '9', NULL, 1);
 
 -- ----------------------------------------------------------------------------
--- Caracteres/Letras: C → a|b|c|...|z
+-- Caracteres/Letras: C → a|b|c|...|z|A|B|C|...|Z
 -- ----------------------------------------------------------------------------
 
 INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccion) VALUES
@@ -166,7 +166,33 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'C', 'w', NULL, 1),
 (FALSE, 'C', 'x', NULL, 1),
 (FALSE, 'C', 'y', NULL, 1),
-(FALSE, 'C', 'z', NULL, 1);
+(FALSE, 'C', 'z', NULL, 1),
+(FALSE, 'C', 'A', NULL, 1),
+(FALSE, 'C', 'B', NULL, 1),
+(FALSE, 'C', 'C', NULL, 1),
+(FALSE, 'C', 'D', NULL, 1),
+(FALSE, 'C', 'E', NULL, 1),
+(FALSE, 'C', 'F', NULL, 1),
+(FALSE, 'C', 'G', NULL, 1),
+(FALSE, 'C', 'H', NULL, 1),
+(FALSE, 'C', 'I', NULL, 1),
+(FALSE, 'C', 'J', NULL, 1),
+(FALSE, 'C', 'K', NULL, 1),
+(FALSE, 'C', 'L', NULL, 1),
+(FALSE, 'C', 'M', NULL, 1),
+(FALSE, 'C', 'N', NULL, 1),
+(FALSE, 'C', 'O', NULL, 1),
+(FALSE, 'C', 'P', NULL, 1),
+(FALSE, 'C', 'Q', NULL, 1),
+(FALSE, 'C', 'R', NULL, 1),
+(FALSE, 'C', 'S', NULL, 1),
+(FALSE, 'C', 'T', NULL, 1),
+(FALSE, 'C', 'U', NULL, 1),
+(FALSE, 'C', 'V', NULL, 1),
+(FALSE, 'C', 'W', NULL, 1),
+(FALSE, 'C', 'X', NULL, 1),
+(FALSE, 'C', 'Y', NULL, 1),
+(FALSE, 'C', 'Z', NULL, 1);
 
 -- ----------------------------------------------------------------------------
 -- K también puede derivar caracteres directamente (caso base)
@@ -198,7 +224,33 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'K', 'w', NULL, 1),
 (FALSE, 'K', 'x', NULL, 1),
 (FALSE, 'K', 'y', NULL, 1),
-(FALSE, 'K', 'z', NULL, 1);
+(FALSE, 'K', 'z', NULL, 1),
+(FALSE, 'K', 'A', NULL, 1),
+(FALSE, 'K', 'B', NULL, 1),
+(FALSE, 'K', 'C', NULL, 1),
+(FALSE, 'K', 'D', NULL, 1),
+(FALSE, 'K', 'E', NULL, 1),
+(FALSE, 'K', 'F', NULL, 1),
+(FALSE, 'K', 'G', NULL, 1),
+(FALSE, 'K', 'H', NULL, 1),
+(FALSE, 'K', 'I', NULL, 1),
+(FALSE, 'K', 'J', NULL, 1),
+(FALSE, 'K', 'K', NULL, 1),
+(FALSE, 'K', 'L', NULL, 1),
+(FALSE, 'K', 'M', NULL, 1),
+(FALSE, 'K', 'N', NULL, 1),
+(FALSE, 'K', 'O', NULL, 1),
+(FALSE, 'K', 'P', NULL, 1),
+(FALSE, 'K', 'Q', NULL, 1),
+(FALSE, 'K', 'R', NULL, 1),
+(FALSE, 'K', 'S', NULL, 1),
+(FALSE, 'K', 'T', NULL, 1),
+(FALSE, 'K', 'U', NULL, 1),
+(FALSE, 'K', 'V', NULL, 1),
+(FALSE, 'K', 'W', NULL, 1),
+(FALSE, 'K', 'X', NULL, 1),
+(FALSE, 'K', 'Y', NULL, 1),
+(FALSE, 'K', 'Z', NULL, 1);
 
 -- ----------------------------------------------------------------------------
 -- S también puede derivar caracteres y espacio directamente (caso base)
@@ -231,6 +283,32 @@ INSERT INTO GLC_en_FNC (start, parte_izq, parte_der1, parte_der2, tipo_produccio
 (FALSE, 'S', 'x', NULL, 1),
 (FALSE, 'S', 'y', NULL, 1),
 (FALSE, 'S', 'z', NULL, 1),
+(FALSE, 'S', 'A', NULL, 1),
+(FALSE, 'S', 'B', NULL, 1),
+(FALSE, 'S', 'C', NULL, 1),
+(FALSE, 'S', 'D', NULL, 1),
+(FALSE, 'S', 'E', NULL, 1),
+(FALSE, 'S', 'F', NULL, 1),
+(FALSE, 'S', 'G', NULL, 1),
+(FALSE, 'S', 'H', NULL, 1),
+(FALSE, 'S', 'I', NULL, 1),
+(FALSE, 'S', 'J', NULL, 1),
+(FALSE, 'S', 'K', NULL, 1),
+(FALSE, 'S', 'L', NULL, 1),
+(FALSE, 'S', 'M', NULL, 1),
+(FALSE, 'S', 'N', NULL, 1),
+(FALSE, 'S', 'O', NULL, 1),
+(FALSE, 'S', 'P', NULL, 1),
+(FALSE, 'S', 'Q', NULL, 1),
+(FALSE, 'S', 'R', NULL, 1),
+(FALSE, 'S', 'S', NULL, 1),
+(FALSE, 'S', 'T', NULL, 1),
+(FALSE, 'S', 'U', NULL, 1),
+(FALSE, 'S', 'V', NULL, 1),
+(FALSE, 'S', 'W', NULL, 1),
+(FALSE, 'S', 'X', NULL, 1),
+(FALSE, 'S', 'Y', NULL, 1),
+(FALSE, 'S', 'Z', NULL, 1),
 (FALSE, 'S', ' ', NULL, 1);
 
 -- ============================================================================
