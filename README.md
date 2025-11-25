@@ -40,14 +40,13 @@
   - [Visualización de la Gramática](#visualización-de-la-gramática)
   - [Visualización de la Matriz CYK](#visualización-de-la-matriz-cyk)
   - [Ejemplos de Uso Completo](#ejemplos-de-uso-completo)
-- [Parte 5: Extensiones y Mejoras](#parte-5-extensiones-y-mejoras)
+- [Parte 5: Extensiones](#parte-5-extensiones)
   - [Gramática para Operaciones Aritméticas](#gramática-para-operaciones-aritméticas-simples)
   - [Gramática para Paréntesis Balanceados](#gramática-para-paréntesis-balanceados)
-  - [Optimizaciones Aplicadas](#optimizaciones-aplicadas)
 
 ## Parte 1: Gramática para JSON
 
-### Símbolo inicial: J {#símbolo-inicial-j}
+### Símbolo inicial: J
 
 #### Producciones:
 
@@ -87,7 +86,7 @@
 - Variables: J, L, P, K, V, S, N, D, C
 - Terminales: {, }, [, ], ", ', :, ,, espacio, 0-9, a-z
 
-## Ejemplo 1: `{"a":10}` {#ejemplo-1-jsona10}
+## Ejemplo 1: `{"a":10}`
 
 ### Derivación más a la izquierda:
 
@@ -128,7 +127,7 @@ J ⇒ { L }
 ```
 
 
-## Ejemplo 2 (con anidamiento): `{"a":10,"c":{"d":99}}` {#ejemplo-2-con-anidamiento-jsona10cd99}
+## Ejemplo 2 (con anidamiento): `{"a":10,"c":{"d":99}}`
 
 ### Derivación parcial:
 
@@ -615,7 +614,7 @@ Z10 → L T_llave_der
 
 ---
 
-## GRAMÁTICA FINAL EN FNC {#gramática-final-en-fnc}
+## GRAMÁTICA FINAL EN FNC
 
 ### Variables:
 
@@ -803,7 +802,7 @@ J ⇒ T_llave_izq Z1
 
 ### Arquitectura del Sistema
 
-### Tablas Principales {#tablas-principales}
+### Tablas Principales
 
 1. **GLC_en_FNC**: Almacena la gramática en Forma Normal de Chomsky
 
@@ -826,7 +825,7 @@ J ⇒ T_llave_izq Z1
 4. **config**: Configuración global
    - Almacena longitud del string, string actual, etc.
 
-### Índices de Optimización {#índices-de-optimización}
+### Índices de Optimización
 
 Para mejorar el rendimiento de las búsquedas frecuentes en el algoritmo CYK, se implementaron índices estratégicos en las tablas principales.
 
@@ -935,7 +934,7 @@ Para mejorar el rendimiento de las búsquedas frecuentes en el algoritmo CYK, se
 
 ---
 
-### VIEWS (Vistas) - Implementación y Propósito {#views-vistas---implementación-y-propósito}
+### VIEWS (Vistas) - Implementación y Propósito
 
 Las **VIEWS** (vistas) en PostgreSQL son consultas almacenadas que se comportan como tablas virtuales. No almacenan datos físicamente, sino que ejecutan una consulta cada vez que se accede a ellas.
 
@@ -1092,7 +1091,7 @@ WHERE tipo_produccion = 2;
 
 ---
 
-### Funciones del Algoritmo CYK {#funciones-del-algoritmo-cyk}
+### Funciones del Algoritmo CYK
 
 #### Función Principal: `cyk(string)`
 
@@ -1297,7 +1296,7 @@ $$ LANGUAGE plpgsql;
 
 ---
 
-### Algoritmo CYK - Programación Dinámica {#algoritmo-cyk---programación-dinámica}
+### Algoritmo CYK - Programación Dinámica
 
 El algoritmo implementa programación dinámica en tres niveles:
 
@@ -1332,7 +1331,7 @@ cyk(string) → Boolean
 - **Consultas set-based**: Las funciones `setear_fila_base`, `setear_segunda_fila` y `setear_matriz`
   usan joins con `unnest` para combinar variables sin bucles explícitos
 
-### Complejidad {#complejidad}
+### Complejidad
 
 - **Tiempo**: O(n³ × |G|)
 
@@ -1666,9 +1665,9 @@ SELECT * FROM ver_gramatica;
 
 ---
 
-## Parte 5: Extensiones y Mejoras
+## Parte 5: Extensiones
 
-### Gramática para operaciones aritméticas simples {#gramática-para-operaciones-aritméticas-simples}
+### Gramática para operaciones aritméticas simples
 ```
 S → E                     # Punto de inicio: una expresión completa
 
@@ -2148,7 +2147,7 @@ SELECT cyk('5/(4-1');        -- FALSE (falta paréntesis de cierre)
 SELECT cyk('1++2');          -- FALSE (sintaxis inválida)
 ```
 
-### Gramática para Paréntesis Balanceados {#gramática-para-paréntesis-balanceados}
+### Gramática para Paréntesis Balanceados
 
 **Gramática original:**
 ```
@@ -2196,27 +2195,4 @@ SELECT cyk(')(');            -- FALSE (desbalanceado)
 SELECT cyk('(()');            -- FALSE (falta cierre)
 SELECT cyk('())');            -- FALSE (desbalanceado)
 ```
-
-### Optimizaciones Aplicadas {#optimizaciones-aplicadas}
-
-1. **Índices estratégicos**:
-
-   - Búsqueda rápida de producciones por terminal
-   - Búsqueda rápida de producciones binarias
-   - Índice en símbolo inicial
-
-2. **Views con unnest**:
-
-   - Facilita queries sobre arrays
-   - Mejor rendimiento en JOINs
-
-3. **Funciones especializadas**:
-
-   - Fila base: O(n)
-   - Segunda fila: O(n)
-   - Resto: O(n³)
-
-4. **RAISE NOTICE para debugging**:
-   - Trace completo del algoritmo
-   - Útil para entender el flujo
 
